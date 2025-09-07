@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Processing Payment</title>
+    <style>
+        :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#9aa6b2}
+        html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
+        body{background:linear-gradient(180deg,#071021 0%,var(--bg) 100%);display:flex;align-items:center;justify-content:center;color:#e6eef3}
+        .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02)); padding:28px;border-radius:12px;box-shadow:0 8px 30px rgba(2,6,23,0.6);width:360px;text-align:center}
+        h1{font-size:18px;margin:0 0 10px;color:#eaf6fb}
+        .amount{font-size:26px;font-weight:600;color:var(--accent);margin-bottom:16px}
+        .spinner{width:84px;height:84px;border-radius:50%;border:6px solid rgba(255,255,255,0.08);border-top-color:var(--accent);margin:0 auto 12px;animation:spin 1s linear infinite;display:flex;align-items:center;justify-content:center}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .progress-wrap{margin-top:8px}
+        .bar{height:10px;background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden}
+        .bar > .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#7c3aed);transition:width 120ms linear}
+        .percent{font-size:13px;color:var(--muted);margin-top:8px}
+        .status{margin-top:12px;font-size:14px;color:#cfeff6}
+        .success{color:#7ef7c1}
+        /* subtle pulse once complete */
+        .pulse{animation:pulse 900ms ease-in-out 1;transform-origin:center}
+        @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+    </style>
+</head>
+<body>
+    <div class="card" role="status" aria-live="polite">
+        <h1>Processing Payment</h1>
+        <div class="amount">
+            <!-- Use your template variable for the amount. Example for Django: {{ total_amount }} -->
+            Total: <span id="amount">{{ total_amount }}</span>
+        </div>
+
+        <div class="spinner" id="spinner" aria-hidden="true"></div>
+
+        <div class="progress-wrap">
+            <div class="bar" aria-hidden="true"><div class="fill" id="fill"></div></div>
+            <div class="percent" id="percent">0%</div>
+        </div>
+
+        <div class="status" id="status">Hang tight — we're processing your payment.</div>
+    </div>
+
+    <script>
+        (function(){
+            // Duration of the "processing" animation in milliseconds
+            var DURATION = 4000;
+            var steps = 100;
+            var interval = DURATION / steps;
+            var pct = 0;
+            var fill = document.getElementById('fill');
+            var percentText = document.getElementById('percent');
+            var status = document.getElementById('status');
+            var spinner = document.getElementById('spinner');
+            var card = document.querySelector('.card');
+
+            // Redirect target. In Django, pass redirect_url into template; fallback to '/dashboard/'.
+            var redirectUrl = "{{ redirect_url|default:'/dashboard/' }}";
+
+            var t = setInterval(function(){
+                pct++;
+                if (pct > 100) { pct = 100; }
+                fill.style.width = pct + '%';
+                percentText.textContent = pct + '%';
+
+                // change messaging at milestones
+                if (pct === 60) status.textContent = 'Verifying payment details...';
+                if (pct === 85) status.textContent = 'Finalizing transaction...';
+
+                if (pct >= 100) {
+                    clearInterval(t);
+                    // show success
+                    spinner.style.borderTopColor = '#10b981';
+                    status.textContent = 'Payment successful — redirecting to dashboard';
+                    status.classList.add('success');
+                    card.classList.add('pulse');
+
+                    // give a small delay so users see success state
+                    setTimeout(function(){
+                        // If you use Django's url tag, you can instead do: window.location.href = "{% url 'dashboard' %}";
+                        window.location.href = redirectUrl;
+                    }, 800);
+                }
+            }, interval);
+        })();
+    </script>
+</body>
+</html></div>

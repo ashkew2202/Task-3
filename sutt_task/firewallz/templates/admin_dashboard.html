@@ -1,0 +1,96 @@
+{% extends "admin_base.html" %}
+{% load static %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="module aligned" aria-labelledby="dashboard-heading" style="padding:1rem 1.5rem;">
+    <h2 id="dashboard-heading">Overview</h2>
+
+    <div class="dashboard-cards" style="display:flex;flex-wrap:wrap;gap:1rem;margin-top:1rem;">
+        <a class="dashboard-card" style="text-decoration:none;color:inherit;flex:1 1 220px;min-width:180px;">
+             <div style="display:flex;align-items:center;border:1px solid #e1e1e1;border-radius:6px;padding:0.8rem 1rem;background:#fff;">
+                 <div style="width:48px;height:48px;flex:0 0 48px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-right:0.8rem;background:#4caf50;color:#fff;">
+                     <span aria-hidden="true">👥</span>
+                 </div>
+                 <div style="flex:1;min-width:0;">
+                     <div style="font-size:0.9rem;color:#666;">Total Players</div>
+                     <div style="font-size:1.45rem;font-weight:600;color:#111;margin-top:0.15rem;">{{ total_players|default:"-" }}</div>
+                 </div>
+             </div>
+        </a>
+
+        <a class="dashboard-card" style="text-decoration:none;color:inherit;flex:1 1 220px;min-width:180px;">
+             <div style="display:flex;align-items:center;border:1px solid #e1e1e1;border-radius:6px;padding:0.8rem 1rem;background:#fff;">
+                 <div style="width:48px;height:48px;flex:0 0 48px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-right:0.8rem;background:#2196f3;color:#fff;">
+                     <span aria-hidden="true">👥</span>
+                 </div>
+                 <div style="flex:1;min-width:0;">
+                     <div style="font-size:0.9rem;color:#666;">Total Teams</div>
+                     <div style="font-size:1.45rem;font-weight:600;color:#111;margin-top:0.15rem;">{{ total_teams|default:"-" }}</div>
+                 </div>
+             </div>
+        </a>
+
+        <a class="dashboard-card" style="text-decoration:none;color:inherit;flex:1 1 220px;min-width:180px;">
+             <div style="display:flex;align-items:center;border:1px solid #e1e1e1;border-radius:6px;padding:0.8rem 1rem;background:#fff;">
+                 <div style="width:48px;height:48px;flex:0 0 48px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-right:0.8rem;background:#9c27b0;color:#fff;">
+                     <span aria-hidden="true">🏫</span>
+                 </div>
+                 <div style="flex:1;min-width:0;">
+                     <div style="font-size:0.9rem;color:#666;">Total Colleges</div>
+                     <div style="font-size:1.45rem;font-weight:600;color:#111;margin-top:0.15rem;">{{ total_colleges|default:"-" }}</div>
+                 </div>
+             </div>
+        </a>
+
+        <a class="dashboard-card" style="text-decoration:none;color:inherit;flex:1 1 220px;min-width:180px;"></a>
+             <div style="display:flex;align-items:center;border:1px solid #e1e1e1;border-radius:6px;padding:0.8rem 1rem;background:#fff;">
+                 <div style="width:48px;height:48px;flex:0 0 48px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-right:0.8rem;background:#ff9800;color:#fff;">
+                     <span aria-hidden="true">✅</span>
+                 </div>
+                 <div style="flex:1;min-width:0;">
+                     <div style="font-size:0.9rem;color:#666;">PCR Approved Players</div>
+                     <div style="font-size:1.45rem;font-weight:600;color:#111;margin-top:0.15rem;">{{ pcr_approved_players|default:"-" }}</div>
+                 </div>
+             </div>
+        </a>
+
+        <a class="dashboard-card" style="text-decoration:none;color:inherit;flex:1 1 220px;min-width:180px;">
+             <div style="display:flex;align-items:center;border:1px solid #e1e1e1;border-radius:6px;padding:0.8rem 1rem;background:#fff;">
+                 <div style="width:48px;height:48px;flex:0 0 48px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-right:0.8rem;background:#ff5722;color:#fff;">
+                     <span aria-hidden="true">🧑‍🏫</span>
+                 </div>
+                 <div style="flex:1;min-width:0;">
+                     <div style="font-size:0.9rem;color:#666;">PCR Approved Coaches</div>
+                     <div style="font-size:1.45rem;font-weight:600;color:#111;margin-top:0.15rem;">{{ pcr_approved_coaches|default:"-" }}</div>
+                 </div>
+             </div>
+        </a>
+
+        <a class="dashboard-card" style="text-decoration:none;color:inherit;flex:1 1 220px;min-width:180px;">
+             <div style="display:flex;align-items:center;border:1px solid #e1e1e1;border-radius:6px;padding:0.8rem 1rem;background:#fff;">
+                 <div style="width:48px;height:48px;flex:0 0 48px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-right:0.8rem;background:#3f51b5;color:#fff;">
+                     <span aria-hidden="true">🔒</span>
+                 </div>
+                 <div style="flex:1;min-width:0;">
+                     <div style="font-size:0.9rem;color:#666;">Firewallz Approved Players</div>
+                     <div style="font-size:1.45rem;font-weight:600;color:#111;margin-top:0.15rem;">{{ firewallz_approved_players|default:"-" }}</div>
+                 </div>
+             </div>
+        </a>
+
+        <a class="dashboard-card" style="text-decoration:none;color:inherit;flex:1 1 220px;min-width:180px;">
+             <div style="display:flex;align-items:center;border:1px solid #e1e1e1;border-radius:6px;padding:0.8rem 1rem;background:#fff;">
+                 <div style="width:48px;height:48px;flex:0 0 48px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-right:0.8rem;background:#607d8b;color:#fff;">
+                     <span aria-hidden="true">🛡️</span>
+                 </div>
+                 <div style="flex:1;min-width:0;">
+                     <div style="font-size:0.9rem;color:#666;">Firewallz Approved Coaches</div>
+                     <div style="font-size:1.45rem;font-weight:600;color:#111;margin-top:0.15rem;">{{ firewallz_approved_coaches|default:"-" }}</div>
+                 </div>
+             </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

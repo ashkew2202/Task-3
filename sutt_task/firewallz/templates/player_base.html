@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    body { display:flex; margin:0; }
+        .sidebar {
+            min-width:200px;
+            max-width:220px;
+            background:#343a40;
+            color:#fff;
+            height:100vh;
+            padding-top:30px;
+        }
+        .sidebar a {
+            color:#fff;
+            text-decoration:none;
+            display:block;
+            padding: 12px 20px;
+            background: linear-gradient(180deg,#000 0%,#050505 100%);
+            color: #eaeaea;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            border-radius: 6px;
+            margin: 8px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.02), 0 8px 18px rgba(0,0,0,0.85), inset 0 -1px 0 rgba(255,255,255,0.02);
+            transition: background .12s ease, transform .08s ease, box-shadow .12s ease, color .12s ease;
+            position: relative;
+            overflow: hidden;
+            font-size: 13px;
+            line-height: 1;
+            text-decoration: none;
+            text-shadow: 0 1px 0 rgba(0,0,0,0.8);
+            -webkit-font-smoothing: antialiased;
+            outline: none;
+        }
+        .sidebar a:hover { background:#495057; }
+        .main-content { flex:1; padding:30px; }
+    </style>
+</head>
+<body>
+    <header>
+        {% block sidebar %}
+        <div class="sidebar">
+            <a href="/firewallz/player/dashboard/">Dashboard</a>
+            <a href="/firewallz/player/sports_registration/">Register For a Sport</a>
+            <a href="#">Profile</a>
+            <a href="/firewallz/player/logout/">Logout</a>
+        </div>
+        {% endblock %}
+    </header>
+        {% block content %}
+        <!-- Main content goes here -->
+        {% endblock %}
+    {% block scripts %}
+    <!-- Add your JS scripts here -->
+    {% endblock %}
+</body>
+</html>

@@ -1,0 +1,335 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{% block title %}Admin - Firewallz{% endblock %}</title>
+
+    <!-- Clean modern font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    {% block extra_head %}{% endblock %}
+
+    <style>
+        :root{
+            --bg-1: #0f1724;
+            --bg-2: #071022;
+            --accent: #6ee7b7;
+            --accent-2: #60a5fa;
+            --muted: rgba(255,255,255,0.08);
+            --glass: rgba(255,255,255,0.04);
+            --text: #e6eef8;
+            --soft: rgba(255,255,255,0.06);
+            --radius: 12px;
+        }
+
+        /* Reset */
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{
+            margin:0;
+            font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: radial-gradient(1200px 600px at 10% 10%, rgba(96,165,250,0.08), transparent),
+                                    radial-gradient(800px 400px at 90% 90%, rgba(110,231,183,0.06), transparent),
+                                    linear-gradient(180deg,var(--bg-1),var(--bg-2));
+            color:var(--text);
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+        }
+
+        /* Layout */
+        .wrap{
+            display:flex;
+            gap:24px;
+            height:100vh;
+            padding:28px;
+        }
+
+        /* Sidebar */
+        .sidebar{
+            width:300px;
+            max-width:calc(100vw - 64px);
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+            border-radius:var(--radius);
+            padding:20px;
+            display:flex;
+            flex-direction:column;
+            backdrop-filter: blur(8px) saturate(120%);
+            box-shadow: 0 6px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            margin-bottom:18px;
+        }
+        .logo{
+            width:44px;height:44px;
+            display:grid;place-items:center;
+            border-radius:10px;
+            background:linear-gradient(135deg,var(--accent),var(--accent-2));
+            box-shadow: 0 6px 18px rgba(96,165,250,0.12), 0 2px 6px rgba(0,0,0,0.4);
+            font-weight:700;
+            color:#04263b;
+            font-size:18px;
+        }
+        .brand h1{font-size:16px;margin:0;}
+        .brand p{margin:0;font-size:12px;color:rgba(230,238,248,0.6)}
+
+        .nav{
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+            margin-top:8px;
+        }
+
+        .nav a{
+            display:flex;
+            gap:12px;
+            align-items:center;
+            padding:10px 12px;
+            border-radius:10px;
+            color:var(--text);
+            text-decoration:none;
+            font-weight:600;
+            font-size:14px;
+            transition:all .18s ease;
+            background:transparent;
+        }
+        .nav a svg{opacity:0.9}
+        .nav a:hover{
+            transform:translateY(-3px);
+            background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            box-shadow: 0 8px 24px rgba(2,6,23,0.6);
+        }
+        .nav a.active{
+            background: linear-gradient(90deg, rgba(96,165,250,0.10), rgba(110,231,183,0.04));
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+        }
+        .nav .label{flex:1}
+
+        .spacer{flex:1}
+
+        .action{
+            display:flex;
+            gap:10px;
+            align-items:center;
+        }
+        .btn{
+            padding:10px 12px;
+            background:linear-gradient(90deg,var(--accent),var(--accent-2));
+            color:#04263b;
+            font-weight:700;
+            border-radius:10px;
+            border: none;
+            cursor:pointer;
+            box-shadow: 0 8px 20px rgba(96,165,250,0.12);
+        }
+        .outline{
+            padding:9px 11px;
+            border-radius:10px;
+            background:transparent;
+            border:1px solid rgba(255,255,255,0.04);
+            color:var(--text);
+            font-weight:600;
+            cursor:pointer;
+        }
+
+        /* Main area */
+        .main{
+            flex:1;
+            display:flex;
+            flex-direction:column;
+            gap:18px;
+        }
+
+        .topbar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+        }
+        .search{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            background:var(--glass);
+            padding:10px 14px;
+            border-radius:12px;
+            width:480px;
+            max-width:60vw;
+        }
+        .search input{
+            background:transparent;border:0;color:var(--text);outline:0;font-size:14px;width:100%;
+        }
+        .user{
+            display:flex;
+            align-items:center;
+            gap:12px;
+        }
+        .avatar{
+            width:40px;height:40px;border-radius:50%;
+            background:linear-gradient(135deg,var(--accent-2),var(--accent));
+            display:grid;place-items:center;font-weight:700;color:#04263b;
+            box-shadow:0 6px 18px rgba(96,165,250,0.12);
+        }
+
+        .content{
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            border-radius:14px;
+            padding:22px;
+            flex:1;
+            overflow:auto;
+            box-shadow: 0 10px 40px rgba(2,6,23,0.55), inset 0 1px 0 rgba(255,255,255,0.02);
+        }
+
+        /* Cards inside content */
+        .cards{
+            display:grid;
+            grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+            gap:16px;
+            margin-bottom:18px;
+        }
+        .card{
+            padding:16px;
+            border-radius:12px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.015), transparent);
+            border:1px solid rgba(255,255,255,0.02);
+            min-height:88px;
+        }
+
+        /* Small utilities */
+        small{color:rgba(230,238,248,0.6)}
+        a.link{color:var(--accent-2);text-decoration:none;font-weight:600}
+
+        /* Responsive */
+        @media (max-width:900px){
+            .wrap{padding:18px;gap:14px}
+            .sidebar{width:86px;padding:12px}
+            .brand h1{display:none}
+            .brand p{display:none}
+            .search{display:none}
+            .nav a{justify-content:center}
+            .nav a .label{display:none}
+            .main{gap:12px}
+        }
+
+        /* Nice scrollbar */
+        .content::-webkit-scrollbar{height:10px;width:10px}
+        .content::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--accent),var(--accent-2));border-radius:999px}
+        .content::-webkit-scrollbar-track{background:transparent}
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <aside class="sidebar" role="navigation" aria-label="Admin sidebar">
+            {% block brand %}
+            <div class="brand">
+                <div class="logo">FZ</div>
+                <div>
+                    <h1>Firewallz Admin</h1>
+                    <p>Portal • Manage approvals & groups</p>
+                </div>
+            </div>
+            {% endblock %}
+
+            {% block sidebar %}
+            <nav class="nav" aria-label="Main navigation">
+                <a href="/firewallz/admin/dashboard/" class="active">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 13h8V3H3v10zM13 21h8V11h-8v10z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="label">Dashboard</span>
+                </a>
+
+                <a href="#" title="PCR Approved Players">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 12c2.761 0 5-2.239 5-5S14.761 2 12 2 7 4.239 7 7s2.239 5 5 5zM3 20v-1c0-2.8 4.8-4 9-4s9 1.2 9 4v1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="label">PCR Approved Players</span>
+                </a>
+
+                <a href="#" title="PCR Approved Coaches">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M16 4s-1.5 2-4 2-4-2-4-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 14v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 8v6a6 6 0 0012 0V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="label">PCR Approved Coaches</span>
+                </a>
+
+                <a href="#" title="Firewallz Approved Players">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2l3 6 6 .5-4.5 3.7L19 21 12 17l-7 4 1.5-8.8L2 8.5 8 8 12 2z" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="label">Firewallz Approved Players</span>
+                </a>
+
+                <a href="#" title="Firewallz Approved Coaches">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.4" /><path d="M7 8h10M7 12h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                    <span class="label">Firewallz Approved Coaches</span>
+                </a>
+
+                <a href="#" title="Group List">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 0-2-2H9l-4 4V5a2 2 0 0 1 2-2h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="label">Group List</span>
+                </a>
+
+                <a href="#" title="Add Groups">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="label">Add Groups</span>
+                </a>
+            </nav>
+            {% endblock %}
+
+            <div class="spacer"></div>
+        </aside>
+
+        <main class="main" role="main">
+            {% block topbar %}
+            <div class="topbar">
+                <div class="search" role="search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="opacity:.9"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <input type="search" placeholder="Search players, coaches, groups..." aria-label="Search">
+                </div>
+
+                <div class="user">
+                    <small style="text-align:right">Welcome back<br><strong>Admin</strong></small>
+                    <div class="avatar">A</div>
+                </div>
+            </div>
+            {% endblock %}
+
+        <section class="content" aria-label="Main content area">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <div>
+                    {% block page_title %}<h2 style="margin:0">Admin Dashboard</h2>{% endblock %}
+                </div>
+
+                <div class="action" role="region" aria-label="User actions">
+                    <form method="post" action="{% url 'admin_logout' %}" style="margin:0;">
+                        {% csrf_token %}
+                        <button type="submit" class="outline" aria-label="Logout">Logout</button>
+                    </form>
+                </div>
+            </div>
+                {% block content %}
+                <div style="display:grid;gap:12px;">
+                    <div style="padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.02)">
+                        <h2 style="margin:0 0 8px 0">Admin Dashboard</h2>
+                        <p style="margin:0;color:rgba(230,238,248,0.65)">Select an item from the left to manage approvals and groups. This base template is ready to extend for pages like PCR Approved Players, Coaches, Firewallz approvals and Group management.</p>
+                    </div>
+                </div>
+                {% endblock %}
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Minimal: allow quick keyboard toggle for sidebar (for small screens)
+        (function(){
+            document.addEventListener('keydown', function(e){
+                if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+                    const sb = document.querySelector('.sidebar');
+                    if(!sb) return;
+                    sb.style.display = sb.style.display === 'none' ? 'flex' : 'none';
+                }
+            });
+        })();
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

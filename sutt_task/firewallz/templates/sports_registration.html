@@ -1,0 +1,97 @@
+{% extends "player_base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+            {# If there are error messages, render a Bootstrap modal and show it #}
+            {% if messages.errors %}
+                <!-- Bootstrap JS needed for modal -->
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+                <div class="modal fade" id="errorsModal" tabindex="-1" aria-labelledby="errorsModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="errorsModalLabel">Errors</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <ul class="mb-0">
+                                    {% for err in messages.errors %}
+                                        <li>{{ err }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                (function(){
+                    // Ensure bootstrap bundle is loaded and then show modal
+                    var showErrorsModal = function(){
+                        var el = document.getElementById('errorsModal');
+                        if (!el || typeof bootstrap === 'undefined') return;
+                        var m = new bootstrap.Modal(el);
+                        m.show();
+                    };
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', showErrorsModal);
+                    } else {
+                        showErrorsModal();
+                    }
+                })();
+                </script>
+            {% endif %}
+
+            <h2 class="mb-4 text-center">Sports Registration</h2>
+            {% if show_payment_button %}
+                <div class="d-grid gap-2 mb-4">
+                    <form method="post" action="{% url 'make_base_payment' %}" class="d-grid">
+                        {% csrf_token %}
+                        <button id="pay-button" type="submit" class="btn btn-success btn-lg">
+                            <span id="pay-label"><i class="bi bi-credit-card"></i> Make Payment</span>
+                            <span id="processing" class="d-none">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Payment under process...
+                            </span>
+                        </button>
+                    </form>
+                    <script>
+                    (function(){
+                      var btn = document.getElementById('pay-button');
+                      if (!btn) return;
+                      var label = btn.querySelector('#pay-label');
+                      var proc = btn.querySelector('#processing');
+                      btn.addEventListener('click', function(e){
+                        if (btn.disabled) { e.preventDefault(); return; }
+                        btn.disabled = true;
+                        if (label) label.classList.add('d-none');
+                        if (proc) proc.classList.remove('d-none');
+                        e.preventDefault(); // delay native submit so animation is visible
+                        setTimeout(function(){ if(btn.form) btn.form.submit(); }, 700);
+                      });
+                    })();
+                    </script>
+                    <p class="text-danger mt-3 text-center">
+                        You have not paid the base amount, so you cannot register for a sport.
+                    </p>
+                </div>
+            {% elif not show_payment_button %}
+                <form method="post" novalidate class="p-4 rounded shadow bg-white">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary w-100 mt-3">Register</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div></p>
+{% endblock %}
