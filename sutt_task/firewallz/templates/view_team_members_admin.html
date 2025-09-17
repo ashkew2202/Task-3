@@ -1,0 +1,83 @@
+{% extends "admin_base.html" %}
+
+{% block extra_head %}
+<style>
+    .team-players-wrapper {padding: 1.5rem;}
+    .tp-table {width:100%; border-collapse: collapse; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.08); border-radius:8px; overflow:hidden; font-size:14px;}
+    .tp-table thead {background:#0d47a1; color:#fff;}
+    .tp-table th, .tp-table td {padding:10px 14px; text-align:left; vertical-align: middle;}
+    .tp-table tbody tr {border-bottom:1px solid #e6eaf0;}
+    .tp-table tbody tr:last-child {border-bottom:none;}
+    .tp-table tbody tr:hover {background:#f5f9ff;}
+    .badge {display:inline-block; padding:4px 8px; border-radius:12px; font-size:11px; font-weight:600; letter-spacing:.5px; text-transform:uppercase;}
+    .badge-approved {background:#e3f7e9; color:#1e7e34;}
+    .badge-pending {background:#fff4d6; color:#8a6d1d;}
+    .approve-btn {background:#1976d2; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:13px; display:inline-flex; align-items:center; gap:4px;}
+    .approve-btn:hover {background:#125a9c;}
+    .empty {padding:1rem; text-align:center; color:#666;}
+    .tp-actions {display:flex; gap:.5rem; align-items:center;}
+    .tp-table {background:transparent !important; box-shadow:none;}
+                .tp-table thead {background:rgba(13,71,161,0.85);}
+                .tp-table tbody tr {background:transparent !important;}
+                .tp-table tbody tr:hover {background:rgba(255,255,255,0.08) !important;}
+                @media (max-width: 900px){
+                    .tp-table tr {background:transparent !important; border:1px solid rgba(255,255,255,0.25);}
+                }
+</style>
+{% endblock extra_head %}
+
+{% block content %}
+<div class="team-players-wrapper">
+    <h2 style="margin:0 0 1rem; font-weight:600; color:#0d47a1;">Team Players- {{ team.team_code }} from {{ team.college.name }}</h2>
+
+    {% if team_players %}
+    <table class="tp-table">
+        <thead>
+            <tr>
+                <th>Player Name</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th>Approve</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for tp in team_players %}
+            <tr>
+                <td data-label="Name">
+                    {{ tp.player.name }}
+                </td>
+                <td data-label="Email">{{ tp.player.email|default:"-" }}</td>
+                <td data-label="Status">
+                    {% if tp.player.verified_by_firewallz %}
+                        <span class="badge badge-approved">Approved</span>
+                    {% else %}
+                        <span class="badge badge-pending">Pending</span>
+                    {% endif %}
+                </td>
+                <td data-label="Joined">
+                    {% if tp.created_at %}{{ tp.created_at|date:"Y-m-d H:i" }}{% else %}-{% endif %}
+                </td>
+                <td data-label="Approve">
+                    <div class="tp-actions">
+                        {% if not tp.player.verified_by_firewallz %}
+                            <form method="post" action="{% url 'approve_player' tp.player.static_id %}" style="margin:0;">
+                                {% csrf_token %}
+                                <button type="submit" class="approve-btn">
+                                    Approve
+                                </button>
+                            </form>
+                        {% else %}
+                            <span style="font-size:12px; color:#4b5563;">—</span>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <div class="empty">No team players found.</div>
+    {% endif %}
+</div>
+{% endblock content %}

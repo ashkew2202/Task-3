@@ -1,0 +1,652 @@
+{% extends "admin_base.html" %}
+{% load static %}
+{% load slugify %}
+
+{% block title %}Create Group{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+    --clr-bg: #ffffff;
+    --clr-border: #d0d7de;
+    --clr-border-strong:#b5bcc3;
+    --clr-accent: #2563eb;
+    --clr-accent-hover:#1d4ed8;
+    --clr-accent-fade: rgba(37,99,235,.08);
+    --clr-text:#1f2328;
+    --clr-text-sub:#59636e;
+    --clr-danger:#b42318;
+    --radius:6px;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.04);
+    --shadow-md:0 4px 10px -2px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.06);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+h1 {
+    margin: 0 0 18px;
+    font-size: 22px;
+    letter-spacing:.3px;
+    font-weight:600;
+}
+
+form {
+    max-width: 1400px;
+}
+
+fieldset {
+    border:1px solid var(--clr-border);
+    background: var(--clr-bg);
+    padding:18px 20px 20px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    margin-bottom:20px;
+}
+
+legend {
+    font-weight:600;
+    padding:0 6px;
+    font-size:14px;
+    color:var(--clr-text-sub);
+}
+
+label {
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    font-size:13px;
+    color:var(--clr-text-sub);
+    margin-bottom:10px;
+}
+
+input[type=text], textarea, select {
+    padding:8px 10px;
+    border:1px solid var(--clr-border);
+    border-radius:4px;
+    font-size:14px;
+    background:#fff;
+    transition:.15s border, .15s box-shadow;
+}
+input[type=text]:focus, textarea:focus, select:focus {
+    outline:none;
+    border-color: var(--clr-accent);
+    box-shadow:0 0 0 3px var(--clr-accent-fade);
+}
+
+textarea { resize: vertical; }
+
+button, .btn {
+    background: var(--clr-accent);
+    color:#fff;
+    border:none;
+    padding:9px 16px;
+    font-size:14px;
+    font-weight:500;
+    border-radius:5px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    cursor:pointer;
+    letter-spacing:.2px;
+    transition: background .15s, transform .15s;
+}
+button:hover, .btn:hover { background: var(--clr-accent-hover); }
+button:active, .btn:active { transform:translateY(1px); }
+button.secondary {
+    background:#f3f4f6;
+    color:#1f2328;
+    border:1px solid var(--clr-border);
+}
+button.secondary:hover {
+    background:#e7e9ec;
+}
+
+.filters input, .filters select {
+    min-width:160px;
+}
+
+.table-shell {
+    background:#fff;
+    border:1px solid var(--clr-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    height:540px;
+}
+
+.table-scroll {
+    overflow:auto;
+    flex:1;
+    border-top:1px solid var(--clr-border);
+}
+
+#players-table {
+    border-collapse: separate;
+    border-spacing:0;
+    width:100%;
+    font-size:13px;
+    line-height:1.35;
+}
+
+#players-table thead th {
+    position:sticky;
+    top:0;
+    background:linear-gradient(#f8f9fa,#f1f5f9);
+    font-weight:600;
+    text-align:left;
+    padding:10px 10px;
+    border-bottom:1px solid var(--clr-border-strong);
+    color:#34424f;
+    font-size:12.5px;
+    letter-spacing:.4px;
+    z-index:2;
+}
+
+#players-table tbody td {
+    padding:8px 10px;
+    border-bottom:1px solid #eef1f4;
+    background:#fff;
+    vertical-align:middle;
+    color:#222;
+}
+
+#players-table tbody tr:last-child td {
+    border-bottom:none;
+}
+
+#players-table tbody tr:hover td {
+    background:#f6faff;
+}
+
+#players-table tbody tr.selected-row td {
+    background: var(--clr-accent-fade);
+}
+
+#players-table tbody tr.selected-row:hover td {
+    background: rgba(37,99,235,.18);
+}
+
+#players-table th:first-child, #players-table td:first-child {
+    width:42px;
+    text-align:center;
+}
+
+input.player-checkbox {
+    width:16px;
+    height:16px;
+    cursor:pointer;
+}
+
+#check-all {
+    width:16px;
+    height:16px;
+    cursor:pointer;
+}
+
+.selected-box {
+    background:#fff;
+    border:1px solid var(--clr-border);
+    border-radius: var(--radius);
+    padding:14px 14px 10px;
+    box-shadow: var(--shadow-sm);
+    font-size:13px;
+    display:flex;
+    flex-direction:column;
+    height:540px;
+}
+
+#selected-list {
+    margin:10px 0 0;
+    padding:0;
+    list-style:none;
+    overflow:auto;
+    flex:1;
+    border-top:1px solid var(--clr-border);
+}
+
+#selected-list li {
+    padding:8px 10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid #eef1f4;
+    gap:10px;
+    background:#fff;
+    font-size:13px;
+}
+#selected-list li:nth-child(even) { background:#fafcff; }
+
+#selected-list li button {
+    background:#e7edf5;
+    color:#2a3b4e;
+    border:none;
+    padding:4px 8px;
+    font-size:12px;
+    line-height:1.1;
+    border-radius:4px;
+}
+#selected-list li button:hover {
+    background:#d3dde8;
+}
+
+.meta-bar {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:8px 14px;
+    font-size:12.5px;
+    color:#506072;
+    background:#f8fafc;
+}
+
+.tag {
+    background:#eef2f7;
+    border:1px solid #dde3ea;
+    font-size:11px;
+    padding:2px 6px 3px;
+    border-radius:4px;
+    font-weight:500;
+    letter-spacing:.3px;
+    color:#334155;
+}
+
+.inline-actions {
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.inline-actions button.small {
+    padding:5px 10px;
+    font-size:12px;
+}
+
+.link-btn {
+    text-decoration:none;
+    font-size:13px;
+    padding:8px 14px;
+    border-radius:5px;
+    border:1px solid var(--clr-border);
+    background:#fff;
+    color:#1f2328;
+    display:inline-flex;
+}
+.link-btn:hover {
+    background:#f2f4f7;
+}
+
+.helper {
+    font-size:12px;
+    color:#64748b;
+    margin-top:4px;
+}
+
+.sticky-toolbar {
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+    padding:14px 14px 10px;
+}
+
+.sticky-toolbar h2 {
+    margin:0;
+    font-size:15px;
+    font-weight:600;
+    color:#183247;
+    letter-spacing:.4px;
+}
+
+.filters {
+    background:#f8fafc;
+    padding:10px 12px;
+    border:1px solid var(--clr-border);
+    border-radius:6px;
+}
+
+.filters .row {
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.counter-pill {
+    background:var(--clr-accent);
+    color:#fff;
+    font-size:11px;
+    padding:2px 8px 3px;
+    border-radius:20px;
+    font-weight:600;
+}
+
+footer.form-actions {
+    display:flex;
+    gap:12px;
+    margin-top:4px;
+}
+
+@media (max-width:1050px) {
+    .layout-split {
+        flex-direction:column;
+    }
+    .selected-box, .table-shell {
+        height:420px;
+    }
+}
+
+@media (max-width:620px) {
+    .filters input, .filters select {
+        min-width:130px;
+    }
+    #players-table thead th:nth-child(3),
+    #players-table tbody td:nth-child(3),
+    #players-table thead th:nth-child(6),
+    #players-table tbody td:nth-child(6) {
+        display:none;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Create Group</h1>
+
+<form method="post" id="group-form" novalidate>
+    {% csrf_token %}
+    <fieldset>
+        <legend>Group Info</legend>
+        <div style="display:flex;flex-wrap:wrap;gap:24px;">
+            <label style="flex:1;min-width:240px;">
+                Group Name
+                <input type="text" name="name" required maxlength="120" placeholder="Example: Summer Training Batch 1">
+                <span class="helper">Required. Unique, descriptive name.</span>
+            </label>
+            <label style="flex:1 1 480px;">
+                Description
+                <textarea name="description" rows="3" placeholder="Optional notes about this group (cohort focus, schedule, etc.)"></textarea>
+            </label>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Players</legend>
+
+        <div class="filters">
+            <div class="row">
+                <input type="text" id="filter-name" placeholder="Search player">
+                <input type="text" id="filter-college" placeholder="College">
+                <select id="filter-approved">
+                    <option value="">Approved?</option>
+                    <option value="true">Approved</option>
+                    <option value="false">Not Approved</option>
+                </select>
+                <select id="filter-gender">
+                    <option value="">Gender</option>
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                    <option value="O">Other</option>
+                </select>
+                <select id="filter-sport">
+                    <option value="">Sport</option>
+                    {% for p in players %}
+                        {% if p.sport %}
+                            <option value="{{ p.sport|slugify }}">{{ p.sport }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                <button type="button" id="clear-filters" class="secondary small" style="font-size:12px;padding:6px 10px;">Reset</button>
+            </div>
+            <div style="margin-top:8px;font-size:11.5px;color:#64748b;">
+                Filter the list then use the master checkbox to select all visible rows.
+            </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 2px 6px;">
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+                <strong style="font-weight:600;">Player Directory</strong>
+                <span id="visible-count" class="tag">0 shown</span>
+                <span id="total-count" class="tag">{{ players|length }} total</span>
+            </div>
+            <div style="display:flex;gap:8px;">
+                <button type="submit" class="small" style="padding:7px 14px;font-size:13px;">Create Group</button>
+                <a href="{% url 'admin_dashboard' %}" class="link-btn">Cancel</a>
+            </div>
+        </div>
+
+        <div class="layout-split" style="display:flex;gap:28px;align-items:stretch;margin-top:4px;">
+            <div style="flex:2;min-width:420px;display:flex;flex-direction:column;gap:14px;">
+                <div class="table-shell">
+                    <div class="meta-bar">
+                        <div>
+                            <input type="checkbox" id="check-all">
+                            <span style="margin-left:6px;">Select Visible</span>
+                        </div>
+                        <div style="display:flex;gap:14px;align-items:center;">
+                            <span style="font-size:11px;">Click a row to toggle selection.</span>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table id="players-table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="check-all-head"></th>
+                                    <th>Name</th>
+                                    <th>College</th>
+                                    <th>Approved</th>
+                                    <th>Gender</th>
+                                    <th>Sport</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for p in players %}
+                                <tr data-name="{{ p.name|lower }}"
+                                    data-college="{{ p.college.name|default:''|lower }}"
+                                    data-approved="{{ p.is_approved|yesno:'true,false' }}"
+                                    data-gender="{{ p.gender }}"
+                                    data-sport="{{ p.sport|slugify }}">
+                                    <td><input type="checkbox" class="player-checkbox" value="{{ p.id }}"></td>
+                                    <td>{{ p.name }}</td>
+                                    <td>{{ p.college.name|default:'-' }}</td>
+                                    <td>{{ p.is_approved|yesno:"Yes,No" }}</td>
+                                    <td>{{ p.gender }}</td>
+                                    <td>{{ p.sport|default:'-' }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div style="flex:1;min-width:280px;">
+                <div class="selected-box">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <strong style="font-weight:600;">Selected Players</strong>
+                        <span class="counter-pill" id="selected-count">0</span>
+                    </div>
+                    <ul id="selected-list"></ul>
+                    <div style="margin-top:6px;">
+                        <button type="button" id="clear-selected" class="secondary small" style="padding:6px 10px;font-size:12px;">Clear Selected</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="hidden-selected"></div>
+    </fieldset>
+
+    <footer class="form-actions">
+        <button type="submit">Create Group</button>
+        <a href="{% url 'admin_dashboard' %}" class="link-btn">Cancel</a>
+    </footer>
+</form>
+
+<script>
+(function() {
+    const $ = s=>document.querySelector(s);
+    const $$ = s=>Array.from(document.querySelectorAll(s));
+    const nameInput = $('#filter-name');
+    const collegeInput = $('#filter-college');
+    const approvedSelect = $('#filter-approved');
+    const genderSelect = $('#filter-gender');
+    const sportSelect = $('#filter-sport');
+    const clearBtn = $('#clear-filters');
+    const rows = $$('#players-table tbody tr');
+    const checkAll = $('#check-all');
+    const checkAllHead = $('#check-all-head');
+    const selectedList = $('#selected-list');
+    const selectedCount = $('#selected-count');
+    const hiddenSelected = $('#hidden-selected');
+    const visibleCount = $('#visible-count');
+    const clearSelectedBtn = $('#clear-selected');
+
+    // Deduplicate sport options
+    (function dedupeSports() {
+        const seen = new Set();
+        [...sportSelect.options].forEach(opt=>{
+            if(!opt.value) return;
+            if(seen.has(opt.value)) opt.remove();
+            else seen.add(opt.value);
+        });
+        const others = [...sportSelect.options].slice(1).sort((a,b)=>a.text.localeCompare(b.text));
+        others.forEach(o=>sportSelect.appendChild(o));
+    })();
+
+    function currentFilterValues() {
+        return {
+            name: nameInput.value.trim().toLowerCase(),
+            college: collegeInput.value.trim().toLowerCase(),
+            approved: approvedSelect.value,
+            gender: genderSelect.value,
+            sport: sportSelect.value
+        };
+    }
+
+    function applyFilter() {
+        const f = currentFilterValues();
+        let shown = 0;
+        rows.forEach(r=>{
+            const ok =
+                (!f.name || r.dataset.name.includes(f.name)) &&
+                (!f.college || r.dataset.college.includes(f.college)) &&
+                (!f.approved || r.dataset.approved === f.approved) &&
+                (!f.gender || r.dataset.gender === f.gender) &&
+                (!f.sport || r.dataset.sport === f.sport);
+            r.style.display = ok ? '' : 'none';
+            if(ok) shown++;
+        });
+        visibleCount.textContent = shown + ' shown';
+        syncMasterCheckbox();
+    }
+
+    function updateSelectedUI() {
+        const checked = $$('.player-checkbox:checked');
+        selectedList.innerHTML = '';
+        hiddenSelected.innerHTML = '';
+        checked.forEach(ch=>{
+            const tr = ch.closest('tr');
+            const li = document.createElement('li');
+            li.textContent = tr.children[1].textContent.trim();
+            const btn = document.createElement('button');
+            btn.type='button';
+            btn.textContent='Remove';
+            btn.addEventListener('click',()=>{
+                ch.checked=false;
+                tr.classList.remove('selected-row');
+                updateSelectedUI();
+            });
+            li.appendChild(btn);
+            selectedList.appendChild(li);
+
+            const hidden = document.createElement('input');
+            hidden.type='hidden';
+            hidden.name='player_ids';
+            hidden.value=ch.value;
+            hiddenSelected.appendChild(hidden);
+
+            tr.classList.add('selected-row');
+        });
+
+        // remove highlight from unchecked
+        $$('.player-checkbox:not(:checked)').forEach(cb=>{
+            cb.closest('tr').classList.remove('selected-row');
+        });
+
+        selectedCount.textContent = checked.length;
+        syncMasterCheckbox();
+    }
+
+    function syncMasterCheckbox() {
+        const visible = rows.filter(r=>r.style.display !== 'none');
+        const visibleBoxes = visible.map(r=>r.querySelector('.player-checkbox'));
+        const allChecked = visibleBoxes.length>0 && visibleBoxes.every(cb=>cb.checked);
+        checkAll.checked = allChecked;
+        checkAllHead.checked = allChecked;
+        checkAll.indeterminate = !allChecked && visibleBoxes.some(cb=>cb.checked);
+        checkAllHead.indeterminate = checkAll.indeterminate;
+    }
+
+    function toggleAll(masterChecked) {
+        const visible = rows.filter(r=>r.style.display !== 'none');
+        visible.forEach(r=>{
+            const cb = r.querySelector('.player-checkbox');
+            cb.checked = masterChecked;
+        });
+        updateSelectedUI();
+    }
+
+    [nameInput, collegeInput, approvedSelect, genderSelect, sportSelect].forEach(el=>{
+        el.addEventListener('input', applyFilter);
+        el.addEventListener('change', applyFilter);
+    });
+
+    clearBtn.addEventListener('click',()=>{
+        nameInput.value='';
+        collegeInput.value='';
+        approvedSelect.value='';
+        genderSelect.value='';
+        sportSelect.value='';
+        applyFilter();
+    });
+
+    document.addEventListener('change',e=>{
+        if(e.target.classList.contains('player-checkbox')) {
+            updateSelectedUI();
+        }
+    });
+
+    // Row click toggles
+    rows.forEach(r=>{
+        r.addEventListener('click', e=>{
+            if(e.target.tagName === 'INPUT') return;
+            const cb = r.querySelector('.player-checkbox');
+            cb.checked = !cb.checked;
+            updateSelectedUI();
+        });
+    });
+
+    checkAll.addEventListener('change', ()=>toggleAll(checkAll.checked));
+    checkAllHead.addEventListener('change', ()=>toggleAll(checkAllHead.checked));
+
+    clearSelectedBtn.addEventListener('click', ()=>{
+        $$('.player-checkbox:checked').forEach(cb=>{
+            cb.checked=false;
+            cb.closest('tr').classList.remove('selected-row');
+        });
+        updateSelectedUI();
+    });
+
+    // Prevent empty group submit
+    $('#group-form').addEventListener('submit', e=>{
+        if($$('.player-checkbox:checked').length === 0) {
+            alert('Select at least one player.');
+            e.preventDefault();
+        }
+    });
+
+    applyFilter();
+    updateSelectedUI();
+})();
+</script>
+{% endblock %}

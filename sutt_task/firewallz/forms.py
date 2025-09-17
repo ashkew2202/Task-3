@@ -56,15 +56,44 @@ CustomBaseUser = get_user_model()
 class PlayerRegistrationForm(forms.ModelForm):
     # Fields that aren’t in CustomBaseUser but needed for Player
     college = forms.ModelChoiceField(queryset=College.objects.all(), required=True)
-    gender = forms.ChoiceField(choices=[("Male", "Male"), ("Female", "Female")])
-    is_coach = forms.BooleanField(required=False)
+    is_coach = forms.BooleanField(required=False, label="Register as Coach?")
+    sports_if_coach = forms.ModelChoiceField(
+        queryset=Sport.objects.all(),
+        required=False,
+        label="Sport (required if coach)"
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        college = cleaned.get("college")
+        is_coach = cleaned.get("is_coach")
+        sport = cleaned.get("sports_if_coach")
+        if is_coach and sport and self.user:
+            try:
+                player_gender = UserProfile.objects.get(auth_user=self.user).gender
+            except UserProfile.DoesNotExist:
+                self.add_error(None, "Associated user profile not found.")
+            else:
+                sport_gender = sport.gender
+                if sport_gender:
+                    if sport_gender!=player_gender:
+                        self.add_error(
+                            "sports_if_coach",
+                            f"Selected sport is restricted to {sport_gender} players."
+                        )
+            
+        if is_coach and not sport:
+            self.add_error("sports_if_coach", "Select a sport if registering as coach.")
+        if not is_coach:
+            cleaned["sports_if_coach"] = None  # ensure not required when not a coach
+        return cleaned
 
     class Meta:
         model = Player
         fields = [
             "college",
-            "gender",
             "is_coach",
+            "sports_if_coach",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -75,15 +104,13 @@ class PlayerRegistrationForm(forms.ModelForm):
         if not self.user:
             raise ValueError("PlayerRegistrationForm requires a user instance")
         player = super().save(commit=False)
-        try:
-            profile = UserProfile.objects.get(auth_user=self.user)
-            player.phone_number = profile.phone_number
-        except UserProfile.DoesNotExist:
-            player.phone_number = None
+        profile = UserProfile.objects.get(auth_user=self.user)
+        player.name = profile.name    
+        player.phone_number = profile.phone_number
+        player.gender = profile.gender
         player.auth_user = self.user
-        player.name = profile.name
         player.email = self.user.email
-        player.status = "pcr_confirmed" # For now
+        player.status = "pcr_confirmed"  # For now
 
         if commit:
             player.save()
@@ -135,7 +162,6 @@ class AdminLoginForm(forms.Form):
 
             if not user.user_type == "admin":
                 raise forms.ValidationError("You do not have admin access.")
-
 
             cleaned["user"] = user
         return cleaned

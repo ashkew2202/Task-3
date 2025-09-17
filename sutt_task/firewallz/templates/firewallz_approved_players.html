@@ -1,0 +1,103 @@
+{% extends 'admin_base.html' %}
+{% load custom_filters %}
+{% block content %}
+<div class="admin-panel firewallz-players">
+    <header class="panel-header">
+        <h1>Firewallz Approved Players</h1>
+    </header>
+
+    {% if players %}
+    <style>
+    .table-wrap {
+        border: none;
+        border-radius: 10px;
+        padding: 10px;
+        background: transparent !important;
+        box-shadow: none;
+    }
+    .table-wrap .tbl,
+    .table-wrap .tbl th,
+    .table-wrap .tbl td {
+        background: transparent !important;
+        color: #fff !important;
+        border-color: rgba(255,255,255,0.12) !important;
+    }
+    .table-wrap .tbl thead th {
+        background: transparent !important;
+        color: #fff !important;
+    }
+    .table-wrap .tbl-striped tbody tr:nth-child(odd) td {
+        background: transparent !important;
+    }
+    .tbl {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: transparent;
+    }
+    .tbl th,
+    .tbl td {
+        border: 1px solid rgba(224, 228, 232, 0.9);
+        padding: 10px 12px;
+        vertical-align: middle;
+        background: #ffffff;
+    }
+    .tbl thead th {
+        background: #f7f8f9;
+        font-weight: 600;
+        text-align: left;
+    }
+    .actions-col {
+        width: 140px;
+        text-align: center;
+    }
+    .tbl-striped tbody tr:nth-child(odd) td {
+        background: #fcfcfd;
+    }
+    </style>
+    <div class="table-wrap">
+        <table class="tbl tbl-striped" aria-describedby="firewallz-players-desc">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Player</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>College</th>
+                    <th>Events-Category</th>
+                    <th class="actions-col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player, team_players in players|zip_lists:team_list %}
+                <tr>
+                    <td class="mono">{{ forloop.counter }}</td>
+                    <td>{{ player.name }}</td>
+                    <td>{{ player.email|default:"-" }}</td>
+                    <td>{{ player.phone_number|default:"-" }}</td>
+                    <td>{{ player.college.name }}</td>
+                    <td>
+                        {% for team_player in team_players %}
+                            {{ team_player.team.sport.name }}-{{ team_player.team.sport.gender }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            -
+                        {% endfor %}
+                    </td>
+                    <td class="actions-col">
+                        <a href="#" class="btn-view" title="View player" aria-label="View player"
+                           style="display:inline-block;padding:6px 10px;border:1px solid #0b74de;border-radius:4px;color:#0b74de;text-decoration:none;font-weight:600;">
+                            View
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="no-data">
+        <p>No approved players found.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

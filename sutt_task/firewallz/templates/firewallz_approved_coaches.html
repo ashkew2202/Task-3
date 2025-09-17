@@ -1,0 +1,110 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+<div class="admin-panel firewallz-coaches">
+    <header class="panel-header">
+        <h1>Firewallz Approved Coaches</h1>
+    </header>
+
+    {% if approved_coaches %}
+    <div class="table-wrap">
+        <table class="tbl tbl-striped" aria-describedby="firewallz-coaches-desc"></table>
+            <thead>
+                <style>
+                /* Card around the table */
+                .table-wrap {
+                    border: none;
+                    border-radius: 10px;
+                    padding: 10px;
+                    background: transparent !important;
+                    box-shadow: none;
+                }
+
+                /* Make table and cells transparent and text white so page background shows through */
+                .table-wrap .tbl,
+                .table-wrap .tbl th,
+                .table-wrap .tbl td {
+                    background: transparent !important;
+                    color: #fff !important;
+                    border-color: rgba(255,255,255,0.12) !important; /* optional lighter border for contrast */
+                }
+
+                .table-wrap .tbl thead th {
+                    background: transparent !important;
+                    color: #fff !important;
+                }
+
+                .table-wrap .tbl-striped tbody tr:nth-child(odd) td {
+                    background: transparent !important;
+                }
+
+                /* Table and cells */
+                .tbl {
+                    width: 100%;
+                    border-collapse: separate; /* keep cell borders visible as separate lines */
+                    border-spacing: 0;
+                    background: transparent;
+                }
+
+                .tbl th,
+                .tbl td {
+                    border: 1px solid rgba(224, 228, 232, 0.9); /* greyish-whitish cell borders */
+                    padding: 10px 12px;
+                    vertical-align: middle;
+                    background: #ffffff;
+                }
+
+                /* Slightly different header background for contrast */
+                .tbl thead th {
+                    background: #f7f8f9;
+                    font-weight: 600;
+                    text-align: left;
+                }
+
+                /* Actions column narrower */
+                .actions-col {
+                    width: 140px;
+                    text-align: center;
+                }
+
+                /* Keep the row striping if present but subtle */
+                .tbl-striped tbody tr:nth-child(odd) td {
+                    background: #fcfcfd;
+                }
+                </style>
+
+                <tr>
+                        <th>#</th>
+                        <th>Coach</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>College</th>
+                        <th class="actions-col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for coach in approved_coaches %}
+                <tr>
+                    <td class="mono">{{ forloop.counter }}</td>
+                    <td>
+                        {{ coach.player.name }}
+                    </td>
+                    <td>{{ coach.player.email|default:"-" }}</td>
+                    <td>{{ coach.player.phone_number|default:"-" }}</td>
+                    <td>
+                        {{ coach.player.college.name }}
+                    </td>
+                    <td class="actions-col">
+                        <a href="#" class="btn-view" title="View coach" aria-label="View coach"
+                           style="display:inline-block;padding:6px 10px;border:1px solid #0b74de;border-radius:4px;color:#0b74de;text-decoration:none;font-weight:600;">
+                            View
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

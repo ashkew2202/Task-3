@@ -1,0 +1,150 @@
+{% extends "admin_base.html" %}
+{% block title %}PCR Approved Coaches{% endblock %}
+{% load custom_filters %}
+{% block content %}
+<div class="admin-panel pcr-coaches">
+    <header class="panel-header">
+        <h1>PCR Approved Coaches</h1>
+    </header>
+
+    {% if approved_coaches %}
+    <div class="table-wrap">
+        <table class="tbl tbl-striped" aria-describedby="pcr-coaches-desc">
+            <thead>
+                <style>
+                /* Card around the table */
+                .table-wrap {
+                    border: none;
+                    border-radius: 10px;
+                    padding: 10px;
+                    background: transparent !important;
+                    box-shadow: none;
+                }
+
+                /* Make table and cells transparent and text white so page background shows through */
+                .table-wrap .tbl,
+                .table-wrap .tbl th,
+                .table-wrap .tbl td {
+                    background: transparent !important;
+                    color: #fff !important;
+                    border-color: rgba(255,255,255,0.12) !important;
+                }
+
+                .table-wrap .tbl thead th {
+                    background: transparent !important;
+                    color: #fff !important;
+                }
+
+                .table-wrap .tbl-striped tbody tr:nth-child(odd) td {
+                    background: transparent !important;
+                }
+
+                /* Table and cells */
+                .tbl {
+                    width: 100%;
+                    border-collapse: separate;
+                    border-spacing: 0;
+                    background: transparent;
+                }
+
+                .tbl th,
+                .tbl td {
+                    border: 1px solid rgba(224, 228, 232, 0.9);
+                    padding: 10px 12px;
+                    vertical-align: middle;
+                    background: #ffffff;
+                }
+
+                .tbl thead th {
+                    background: #f7f8f9;
+                    font-weight: 600;
+                    text-align: left;
+                }
+
+                .actions-col {
+                    width: 180px;
+                    text-align: center;
+                }
+                .actions-col .actions-group {
+                    display: flex;
+                    gap: 8px;
+                    justify-content: center;
+                    align-items: center;
+                    flex-wrap: wrap;
+                }
+                .actions-col .actions-group a,
+                .actions-col .actions-group button {
+                    display: inline-block;
+                    padding: 6px 10px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    text-decoration: none;
+                    line-height: 1.2;
+                }
+                .actions-col .actions-group a.btn-view {
+                    border: 1px solid #0b74de;
+                    color: #0b74de;
+                    background: #ffffff;
+                }
+                .actions-col .actions-group button.btn-approve {
+                    background: #2e7d32;
+                    color: #fff;
+                    border: 1px solid #2e7d32;
+                }
+
+                .tbl-striped tbody tr:nth-child(odd) td {
+                    background: #fcfcfd;
+                }
+                </style>
+                <tr>
+                    <th>#</th>
+                    <th>Coach</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>College</th>
+                    <th>Sport</th>
+                    <th>Payment Status</th>
+                    <th class="actions-col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for coach, payment in approved_coaches|zip_lists:payment_statuses %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ coach.name }}</td>
+                    <td>{{ coach.email }}</td>
+                    <td>{{ coach.phone_number }}</td>
+                    <td>{{ coach.college }}</td>
+                    <td>{{ coach.sport_if_coach }}</td>
+                    <td>
+                        {% if payment %}
+                            <span style="color:#2e7d32;font-weight:600;">Paid</span>
+                        {% else %}
+                            <span style="color:#c62828;font-weight:600;">Unpaid</span>
+                            <form method="post" action="{% url 'mark_coach_paid' coach.id %}" style="display:inline;margin-left:8px;">
+                                {% csrf_token %}
+                                <button type="submit" name="action" value="mark_paid" style="background:#2e7d32;color:#fff;border:1px solid #2e7d32;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;">
+                                    Mark as Paid
+                                </button>
+                            </form>
+                        {% endif %}
+                    </td>
+                    <td class="actions-col">
+                        <div class="actions-group">
+                            <a href="#" class="btn-view" title="View coach" aria-label="View coach">View</a>
+                            <form method="post" action="{% url 'approve_player' coach.static_id %}" style="display:inline;margin:0;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-approve" name="action" value="approve_players">Approve Players</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

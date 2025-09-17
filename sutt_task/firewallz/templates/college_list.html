@@ -1,0 +1,100 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+<div class="college-container container mt-4">
+    <h2>College List</h2>
+    <style>
+        .college-container {
+            margin-top: 1.5rem;
+        }
+        h2 {
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .table-container {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            max-width: 1100px;
+            background: transparent;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+            margin: 0 auto;
+            padding: 20px 24px;
+            border: 1px solid rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+        }
+        .table {
+            width: 100%;
+            background: transparent;
+        }
+        /* Updated table styling */
+        .table-container {
+            border: none;
+            border-radius: 10px;
+            padding: 10px;
+            background: transparent !important;
+            box-shadow: none;
+        }
+        .table,
+        .table th,
+        .table td {
+            background: transparent !important;
+            color: #fff !important;
+            border-color: rgba(255,255,255,0.12) !important;
+        }
+        .table thead th {
+            background: transparent !important;
+            color: #fff !important;
+            font-weight: 600;
+            text-align: left;
+        }
+        .table-striped tbody tr:nth-child(odd) td {
+            background: transparent !important;
+        }
+        .actions-col {
+            width: 140px;
+            text-align: center;
+        }
+        .table th,
+        .table td {
+            vertical-align: middle;
+            padding: 12px 14px;
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        .table-striped > tbody > tr:nth-of-type(odd) > td {
+            background-color: rgba(255,255,255,0.05);
+        }
+        .table-hover > tbody > tr:hover > td {
+            background-color: rgba(255,255,255,0.08);
+        }
+    </style>
+    <div class="table-responsive table-container">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>College Name</th>
+                    <th>Representative</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for college in colleges %}
+                <tr>
+                    <td>{{ college.name }}</td>
+                    <td>{{ college.representative }}</td>
+                    <td>
+                        <a href="{% url 'players_per_college' college.pk %}" class="btn btn-primary btn-sm">
+                            View Players
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">No colleges found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

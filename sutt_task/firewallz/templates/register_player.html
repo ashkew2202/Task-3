@@ -1,18 +1,255 @@
-<!DOCTYPE html>
+{% load static %}
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Register Player</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Register as a Player</title>
+    <style>
+        :root{
+            --bg1: #0b0b0c;
+            --bg2: #121214;
+            --card: rgba(255,255,255,0.03);
+            --accent: #7dd3fc; /* cyan-ish */
+            --muted: rgba(255,255,255,0.65);
+            --glass-border: rgba(255,255,255,0.06);
+            --error: #ff6b6b;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        }
+
+        html,body{
+            height:100%;
+            margin:0;
+            background: radial-gradient(1000px 600px at 10% 10%, rgba(125,211,252,0.05), transparent),
+                                    linear-gradient(180deg, var(--bg1), var(--bg2));
+            color: #e6eef6;
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+        }
+
+        .wrap{
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:3rem 1rem;
+        }
+
+        .card{
+            width:100%;
+            max-width:420px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            border:1px solid var(--glass-border);
+            border-radius:12px;
+            padding:28px;
+            box-shadow: 0 10px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+            backdrop-filter: blur(6px) saturate(120%);
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:.75rem;
+            margin-bottom:12px;
+        }
+
+        .brand .logo{
+            width:44px;
+            height:44px;
+            border-radius:10px;
+            background: linear-gradient(135deg, rgba(125,211,252,0.18), rgba(45,212,191,0.06));
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:var(--accent);
+            font-weight:700;
+            font-size:18px;
+            border:1px solid rgba(125,211,252,0.08);
+            box-shadow: 0 4px 18px rgba(125,211,252,0.04);
+        }
+
+        h1{
+            margin:0;
+            font-size:18px;
+            letter-spacing: -0.2px;
+            color: #eaf6ff;
+        }
+
+        p.subtitle{
+            margin:6px 0 18px 0;
+            color: var(--muted);
+            font-size:13px;
+        }
+
+        form{
+            display:flex;
+            flex-direction:column;
+            gap:14px;
+        }
+
+        .field{
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+        }
+
+        label{
+            font-size:13px;
+            color:var(--muted);
+            display:block;
+        }
+
+        input, select, textarea {
+            appearance:none;
+            -webkit-appearance:none;
+            background: rgba(255,255,255,0.02);
+            border:1px solid rgba(255,255,255,0.04);
+            color: #eaf6ff;
+            padding:12px 14px;
+            border-radius:8px;
+            font-size:14px;
+            outline:none;
+            transition:box-shadow .15s ease, border-color .12s ease, transform .06s ease;
+            width:100%;
+            box-shadow: inset 0 -6px 14px rgba(2,6,23,0.18);
+        }
+
+        input:focus, textarea:focus, select:focus{
+            border-color: rgba(125,211,252,0.6);
+            box-shadow: 0 6px 30px rgba(13, 60, 76, 0.18), 0 0 0 4px rgba(125,211,252,0.06);
+            transform: translateY(-1px);
+        }
+
+        .help{
+            font-size:12px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .row {
+            display:flex;
+            gap:12px;
+            align-items:center;
+            justify-content:space-between;
+        }
+
+        .btn {
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            padding:10px 14px;
+            border-radius:10px;
+            background: linear-gradient(90deg, rgba(125,211,252,0.12), rgba(124,58,237,0.06));
+            color: #eaffff;
+            border:1px solid rgba(125,211,252,0.14);
+            cursor:pointer;
+            font-weight:600;
+            font-size:14px;
+            transition: transform .12s ease, box-shadow .12s ease, opacity .06s ease;
+        }
+
+        .btn:active{ transform: translateY(1px); }
+        .btn.primary{
+            background: linear-gradient(90deg, #06b6d4, #7c3aed);
+            border: none;
+            box-shadow: 0 8px 30px rgba(99,102,241,0.12);
+        }
+
+        .meta{
+            display:flex;
+            gap:10px;
+            align-items:center;
+            font-size:13px;
+            color:var(--muted);
+        }
+
+        .errors{
+            background: linear-gradient(180deg, rgba(255,107,107,0.06), rgba(255,107,107,0.03));
+            border:1px solid rgba(255,107,107,0.12);
+            color: #ffdede;
+            padding:10px 12px;
+            border-radius:8px;
+            font-size:13px;
+        }
+
+        .field-error{
+            color: var(--error);
+            font-size:12px;
+            margin-top:6px;
+        }
+
+        .footer-note{
+            margin-top:12px;
+            font-size:12px;
+            color:var(--muted);
+            text-align:center;
+        }
+
+        @media (max-width:420px){
+            .card{ padding:20px; border-radius:10px; }
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h2 class="mb-4">Player Registration</h2>
-        <form method="post" action="" class="card p-4 shadow-sm">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Register</button>
-        </form>
+    <div class="wrap">
+        <main class="card" role="main" aria-labelledby="login-heading">
+            <div class="brand">
+                <div class="logo">FZ</div>
+                <div>
+                    <h1 id="login-heading">Firewallz Portal — Player</h1>
+                    <p class="subtitle">Secure access to the administration interface</p>
+                </div>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="errors">
+                    {% for err in form.non_field_errors %}
+                        <div>{{ err }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div aria-label="alternate access options" style="margin:0 0 20px 0; display:flex; flex-direction:column; gap:8px;">
+                <div style="font-size:13px; color:var(--muted);">
+                    Already have a player account?
+                    <a href="{% url 'login_player' %}" style="color:var(--accent); text-decoration:none;">Sign in</a>
+                </div>
+                <div style="font-size:13px; color:var(--muted);">
+                    Administrator?
+                    <a href="{% url 'admin_login' %}" style="color:var(--accent); text-decoration:none;">Admin login</a>
+                </div>
+            </div>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="field">
+                        {% if field.label %}
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {% endif %}
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="help">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% for err in field.errors %}
+                            <div class="field-error">{{ err }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+                <div class="row" style="margin-top:6px;">
+                    <div class="meta">
+                        {% if form.remember %}
+                            <!-- if there's a remember field in the form -->
+                            {{ form.remember }} <span style="margin-left:6px">Remember me</span>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn primary">Sign in</button>
+                </div>
+            </form>
+
+            <div class="footer-note">
+                Unauthorized access is logged. Contact your administrator for help.
+            </div>
+        </main>
     </div>
 </body>
-</html>
+</html></div>

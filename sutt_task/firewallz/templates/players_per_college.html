@@ -1,0 +1,112 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Players - {{ college.name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.table-wrap {
+  margin-top: 16px;
+  border: 1px solid #d1d9e6;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+/* Table core - removed transparency overrides to restore readable backgrounds */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  color: #1e2530;
+}
+
+/* Table header */
+.tbl thead th {
+  background: #f1f5f9;
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 18px;
+  font-size: 0.78rem;
+  color: #243043;
+  border: 1px solid #d1d9e6;
+}
+
+/* Table body */
+.tbl tbody td {
+  padding: 12px 18px;
+  border: 1px solid #d1d9e6;
+  background: #fff;
+}
+
+/* Zebra striping */
+.tbl tbody tr:nth-child(even) td {
+  background: #f9fafb;
+}
+
+/* Hover */
+.tbl tbody tr:hover td {
+  background: #eef6ff;
+}
+
+/* Empty state */
+.tbl tbody tr.empty-row td {
+  text-align: center;
+  padding: 40px 12px;
+  font-size: 0.95rem;
+  color: #64748b;
+  background: #f1f5f9;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+  <h2 style="margin:0 0 14px;font-weight:600;font-size:1.3rem;">
+    {{ college.name }}
+    <small style="font-size:.8rem;font-weight:500;color:#6a7581;">( {{ player_count }} player{{ player_count|pluralize }} )</small>
+  </h2>
+
+  <!-- Your filters and table here -->
+  <div class="table-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Player</th>
+          <th>Gender</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Firewallz Verified</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if players %}
+          {% for p in players %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ p.name }}</td>
+            <td>{{ p.get_gender_display }}</td>
+            <td>{{ p.email }}</td>
+            <td>{{ p.phone_number }}</td>
+            <td>{% if p.verified_by_firewallz %}Yes{% else %}No{% endif %}</td>
+            <td>
+              <a href="#" class="btn btn-sm btn-primary">View</a>
+              {% if not p.verified_by_firewall %}
+              <form action="{% url 'approve_player' p.static_id %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-success">Approve</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr class="empty-row"><td colspan="7">No players found.</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+

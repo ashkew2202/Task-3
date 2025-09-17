@@ -1,0 +1,233 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Team List</h2>
+    <style>
+    .table-wrap {
+        border: none;
+        border-radius: 10px;
+        padding: 10px;
+        background: transparent !important;
+        box-shadow: none;
+    }
+    .table-wrap .tbl,
+    .table-wrap .tbl th,
+    .table-wrap .tbl td {
+        background: transparent !important;
+        color: #fff !important;
+        border-color: rgba(255,255,255,0.12) !important;
+    }
+    .table-wrap .tbl thead th {
+        background: transparent !important;
+        color: #fff !important;
+    }
+    .table-wrap .tbl-striped tbody tr:nth-child(odd) td {
+        background: transparent !important;
+    }
+    .tbl {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: transparent;
+    }
+    .tbl th,
+    .tbl td {
+        border: 1px solid rgba(224, 228, 232, 0.9);
+        padding: 10px 12px;
+        vertical-align: middle;
+        background: #ffffff;
+        color: #222;
+    }
+    .tbl thead th {
+        background: #f7f8f9;
+        font-weight: 600;
+        text-align: left;
+    }
+    .actions-col {
+        width: 140px;
+        text-align: center;
+    }
+    .tbl-striped tbody tr:nth-child(odd) td {
+        background: #fcfcfd;
+    }
+
+    /* Fixed / improved button */
+    .view-btn {
+        --btn-start:#2563eb;
+        --btn-end:#0ea5e9;
+        --btn-hover-start:#1d4ed8;
+        --btn-hover-end:#0284c7;
+        --btn-active:#1e40af;
+        background: linear-gradient(135deg,var(--btn-start),var(--btn-end));
+        border: 1px solid rgba(255,255,255,0.18);
+        color: #fff !important;
+        font-weight: 600;
+        letter-spacing: .3px;
+        padding: .55rem 1.05rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 14px -3px rgba(0,74,150,.35), inset 0 0 0 1px rgba(255,255,255,.15);
+        transition: background .25s ease, transform .18s ease, box-shadow .25s ease, filter .25s;
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .8rem;
+        position: relative;
+        overflow: hidden;
+        text-decoration: none !important;
+    }
+    .view-btn::after{
+        content:"";
+        position:absolute;
+        inset:0;
+        background: linear-gradient(120deg,rgba(255,255,255,.15),transparent 55%);
+        opacity:.0;
+        transition:.4s;
+        pointer-events:none;
+    }
+    .view-btn:hover {
+        background: linear-gradient(135deg,var(--btn-hover-start),var(--btn-hover-end));
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px -4px rgba(0,74,150,.45), 0 2px 4px -1px rgba(0,0,0,.25);
+    }
+    .view-btn:hover::after{
+        opacity:.55;
+    }
+    .view-btn:active {
+        transform: translateY(0);
+        background: var(--btn-active);
+        box-shadow: 0 3px 10px -2px rgba(0,74,150,.4);
+    }
+    .view-btn:focus-visible{
+        outline:2px solid #fff;
+        outline-offset:2px;
+    }
+    .view-btn svg{
+        width:14px;
+        height:14px;
+        stroke:currentColor;
+    }
+    .action-buttons{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:8px;
+        flex-wrap:wrap;
+    }
+    .approve-btn{
+        --btn-start:#16a34a;
+        --btn-end:#22c55e;
+        --btn-hover-start:#15803d;
+        --btn-hover-end:#16a34a;
+        --btn-active:#166534;
+        background: linear-gradient(135deg,var(--btn-start),var(--btn-end));
+        border: 1px solid rgba(255,255,255,0.18);
+        color:#fff !important;
+        font-weight:600;
+        letter-spacing:.3px;
+        padding:.55rem 1.05rem;
+        border-radius:10px;
+        box-shadow:0 4px 14px -3px rgba(0,150,74,.35), inset 0 0 0 1px rgba(255,255,255,.15);
+        transition: background .25s ease, transform .18s ease, box-shadow .25s ease, filter .25s;
+        display:inline-flex;
+        align-items:center;
+        gap:.35rem;
+        font-size:.8rem;
+        position:relative;
+        overflow:hidden;
+        text-decoration:none !important;
+        cursor:pointer;
+    }
+    .approve-btn:hover{
+        background: linear-gradient(135deg,var(--btn-hover-start),var(--btn-hover-end));
+        transform: translateY(-2px);
+        box-shadow:0 6px 18px -4px rgba(0,150,74,.45), 0 2px 4px -1px rgba(0,0,0,.25);
+    }
+
+    </style>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const t = document.querySelector('.table-responsive > table');
+        if (t) {
+            t.className = 'tbl tbl-striped';
+            t.parentElement.classList.add('table-wrap');
+        }
+    });
+    </script>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Team Code</th>
+                    <th>College Name</th>
+                    <th>Captain Name</th>
+                    <th>Sport</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for team in teams %}
+                <tr>
+                    <td>{{ team.team_code }}</td>
+                    <td>{{ team.college.name }}</td>
+                    <td>{{ team.captain.name|default:"-" }}</td>
+                    <td>{{ team.sport.name }}</td>
+                    <td>
+                        {% if team.is_verified_by_firewallz %}
+                            <span class="badge bg-success">Approved</span>
+                        {% else %}
+                            <span class="badge bg-danger">Not Approved</span>
+                        {% endif %}
+                    </td>
+                    <td class="actions-col">
+                        
+                            <svg fill="none" viewBox="0 0 24 24"><path d="M2.5 12s3.5-7 9.5-7 9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.5" stroke-width="2"/></svg></a>
+                            <a href="{% url 'view_team_members_admin' team.static_id %}" class="btn btn-sm view-btn" style="margin-left:6px;"></a>
+                            View Players
+                        </a>
+                        {% if not team.is_verified_by_firewallz %}
+                        <form method="post" action="{% url 'approve_team' team.static_id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-success" style="margin-left:6px;">Approve</button>
+                        </form>
+                        {% else %}
+                        <span class="badge bg-success" style="margin-left:6px;">Approved</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No teams found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.table {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table th {
+    background-color: rgba(248, 249, 250, 0.95);
+    border-color: #dee2e6;
+    font-weight: 600;
+    color: #495057;
+}
+
+.table td {
+    border-color: #dee2e6;
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+.table tbody tr:hover {
+    background-color: rgba(248, 249, 250, 0.7);
+}
+</style>
+{% endblock %}

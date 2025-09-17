@@ -1,0 +1,535 @@
+{% extends "player_base.html" %}
+{% load static %}
+
+{% block title %}{{ player.name }} | Profile{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Layout */
+.profile-wrapper {
+    --gap: 1.25rem;
+    --radius: 14px;
+    --border: 1px solid var(--line, #1f2533);
+    display: grid;
+    gap: var(--gap);
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 1.75rem clamp(1rem,2vw,2rem) 3rem;
+    animation: fade .4s ease;
+}
+@keyframes fade {from{opacity:0;transform:translateY(10px)}}
+
+/* Card */
+.card {
+    background: linear-gradient(145deg,#141922,#0d1117);
+    border: var(--border);
+    border-radius: var(--radius);
+    padding: 1.35rem 1.4rem 1.6rem;
+    position: relative;
+    overflow:hidden;
+    /* Accent styles adaptable to player model flags (coach / verified) */
+    --coach-glow: 0 0 0 1px #36543a, 0 0 12px -2px #2fa84f55;
+    --verified-glow: 0 0 0 1px #334b72, 0 0 14px -2px #3c6dff55;
+    transition: box-shadow .35s, border-color .35s, background .35s;
+}
+.card:before {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+        radial-gradient(circle at 85% 15%,rgba(90,150,255,.08),transparent 60%),
+        radial-gradient(circle at 10% 90%,rgba(90,255,210,.06),transparent 55%);
+    pointer-events:none;
+}
+
+/* Header */
+.profile-header {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.4rem clamp(.8rem,2vw,2rem);
+    align-items: center;
+}
+.avatar-wrap {
+    position: relative;
+    width: 140px;
+    aspect-ratio: 1;
+    border-radius: 22px;
+    overflow: hidden;
+    background:#0b0f14;
+    box-shadow: 0 0 0 1px #263044, 0 4px 18px -6px rgba(0,0,0,.7);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.avatar-wrap img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    transition: transform .6s;
+}
+.avatar-wrap:hover img { transform: scale(1.055); }
+.badge-rank {
+    position:absolute;
+    bottom:8px;
+    left:8px;
+    background:linear-gradient(135deg,#3d6bff,#7a3dff);
+    padding:.35rem .6rem;
+    font-size:.65rem;
+    letter-spacing:.5px;
+    border-radius: 7px;
+    font-weight:600;
+    text-transform:uppercase;
+    color:#fff;
+    box-shadow:0 2px 6px -2px rgba(0,0,0,.6);
+}
+.edit-avatar-btn {
+    position:absolute;
+    top:8px;
+    right:8px;
+    background:rgba(15,20,28,.72);
+    backdrop-filter: blur(6px);
+    border:1px solid #2c3747;
+    padding:.45rem .55rem;
+    font-size:.65rem;
+    letter-spacing:.5px;
+    color:#c9d3e3;
+    border-radius:8px;
+    cursor:pointer;
+    transition:.25s;
+}
+.edit-avatar-btn:hover { background:#1b2430;color:#fff; }
+
+/* Typography */
+h1 {
+    font-size:clamp(1.65rem,2.2vw,2.2rem);
+    line-height:1.1;
+    margin:0 0 .55rem;
+    font-weight:600;
+    background: linear-gradient(90deg,#ffffff,#9bb8ff);
+    -webkit-background-clip: text;
+    color:transparent;
+}
+.subline {
+    font-size:.9rem;
+    color:#7f8da3;
+    display:flex;
+    flex-wrap:wrap;
+    gap:.65rem .9rem;
+    line-height:1.3;
+}
+.subline span {
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+    background:#161d27;
+    padding:.45rem .7rem;
+    border-radius:7px;
+    border:1px solid #202a39;
+    font-weight:500;
+    font-size:.72rem;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+    color:#aebcd2;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+    gap:1rem;
+}
+.stat-block {
+    background:#10161e;
+    border:1px solid #1f2733;
+    border-radius:12px;
+    padding:.85rem .95rem .95rem;
+    position:relative;
+    overflow:hidden;
+    min-height:90px;
+}
+.stat-block:before {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(130deg,rgba(90,150,255,.09),transparent 60%);
+    opacity:.55;
+    mix-blend-mode:overlay;
+    pointer-events:none;
+}
+.stat-label {
+    font-size:.65rem;
+    font-weight:600;
+    letter-spacing:.5px;
+    color:#6b7d95;
+    text-transform:uppercase;
+    margin-bottom:.4rem;
+    display:block;
+}
+.stat-value {
+    font-size:1.4rem;
+    font-weight:600;
+    letter-spacing:.5px;
+    color:#e8f1ff;
+    line-height:1.1;
+}
+.stat-sub {
+    font-size:.65rem;
+    margin-top:.25rem;
+    color:#7c8ba1;
+    letter-spacing:.4px;
+}
+
+/* Editable Form */
+.edit-toggle-bar {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin: 0 0 1rem;
+    gap:.75rem;
+    flex-wrap:wrap;
+}
+.btn {
+    --bg:#192231;
+    --fg:#d3e1f7;
+    --bg-hover:#243044;
+    position:relative;
+    appearance:none;
+    font:inherit;
+    cursor:pointer;
+    border:1px solid #293549;
+    background:var(--bg);
+    color:var(--fg);
+    padding:.65rem 1rem .7rem;
+    font-size:.78rem;
+    letter-spacing:.6px;
+    font-weight:600;
+    text-transform:uppercase;
+    border-radius:9px;
+    display:inline-flex;
+    align-items:center;
+    gap:.55rem;
+    transition:.25s;
+}
+.btn:hover { background:var(--bg-hover); color:#fff; }
+.btn.primary {
+    --bg:linear-gradient(135deg,#2f67ff,#6e3dff);
+    --fg:#fff;
+    border:1px solid #3d5fb1;
+    box-shadow:0 2px 10px -4px rgba(0,0,0,.6),0 0 0 1px #264a94;
+}
+.btn.primary:hover { filter: brightness(1.07); }
+.btn.danger {
+    --bg:#3a1f26;
+    --fg:#e8cfd3;
+    border-color:#5c2f39;
+}
+.btn.danger:hover { background:#5a2732;color:#fff; }
+
+/* Form Fields */
+.form-grid {
+    display:grid;
+    gap:1.1rem 1.25rem;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    margin-top:.35rem;
+}
+.field {
+    display:flex;
+    flex-direction:column;
+    gap:.45rem;
+    position:relative;
+}
+.field label {
+    font-size:.68rem;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.55px;
+    color:#7d8ba0;
+}
+.field input[type=text],
+.field textarea,
+.field select {
+    background:#121a24;
+    border:1px solid #243040;
+    border-radius:9px;
+    color:#e2edf9;
+    font:inherit;
+    padding:.7rem .75rem .78rem;
+    font-size:.82rem;
+    resize:vertical;
+    min-height:46px;
+    line-height:1.4;
+    transition:border .25s, background .25s;
+}
+.field textarea {
+    min-height:130px;
+    line-height:1.35;
+}
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+    outline:none;
+    border-color:#3c5dff;
+    background:#141f2c;
+    box-shadow:0 0 0 1px #3c5dff44;
+}
+.field small {
+    font-size:.6rem;
+    color:#6e7f91;
+    letter-spacing:.4px;
+}
+
+/* Avatar upload inline */
+.avatar-field {
+    display:flex;
+    flex-direction:column;
+    gap:.55rem;
+}
+
+/* Bio preview */
+#bioPreview {
+    white-space:pre-wrap;
+    font-size:.78rem;
+    line-height:1.4;
+    background:#121a24;
+    border:1px dashed #243040;
+    border-radius:9px;
+    padding:.85rem .95rem;
+    color:#b7c6d7;
+    display:none;
+}
+
+/* Chips */
+.meta-chips {
+    display:flex;
+    flex-wrap:wrap;
+    gap:.45rem;
+    margin-top:.8rem;
+}
+.meta-chips span {
+    background:#18222f;
+    border:1px solid #243041;
+    font-size:.6rem;
+    text-transform:uppercase;
+    letter-spacing:.55px;
+    padding:.45rem .55rem .42rem;
+    border-radius:7px;
+    color:#8da2bb;
+    font-weight:600;
+}
+
+/* Sections */
+.section-title {
+    font-size:.72rem;
+    letter-spacing:.55px;
+    font-weight:700;
+    color:#7d8aa0;
+    text-transform:uppercase;
+    margin:0 0 .75rem;
+    display:flex;
+    align-items:center;
+    gap:.55rem;
+}
+.section-title:before {
+    content:"";
+    width:28px;
+    height:2px;
+    background:linear-gradient(90deg,#3b63ff,#6a3dff);
+    border-radius:3px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 760px) {
+    .profile-header { grid-template-columns: 1fr; text-align:center; }
+    .avatar-wrap { margin:0 auto; }
+    .subline { justify-content:center; }
+    .edit-toggle-bar { justify-content:center; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-wrapper">
+
+    <div class="card">
+        <div class="profile-header">
+            <div>
+                <h1>{{ player.name }}</h1>
+                <div class="subline">
+                    {% if player.gender %}
+                        <style>
+                            /* Improved spacing & typography for profile meta chips */
+                            .subline { gap: 0.95rem 1.25rem; }
+                            .subline span {
+                                font-family: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+                                font-size: .8rem;
+                                font-weight: 600;
+                                letter-spacing: .6px;
+                                display:flex;
+                                gap:.55rem;
+                                width:100%;
+                                justify-content:flex-start;
+                                align-items:center;
+                                text-transform:none;
+                            }
+                            .subline {
+                                flex-direction:column;
+                                align-items:flex-start;
+                            }
+                            .subline span::before {
+                                content: attr(data-label);
+                                font-size:.65rem;
+                                font-weight:600;
+                                text-transform:uppercase;
+                                letter-spacing:.55px;
+                                color:#6f8199;
+                                min-width:110px;
+                                display:inline-block;
+                                padding: .58rem .9rem .52rem;
+                                border-radius: 11px;
+                                line-height: 1.15;
+                            }
+                        </style>
+                        <span style="background:#1c2735;border-color:#2d3a4c;color:#cdd9e8;">{{ player.gender }}</span>
+                    {% endif %}
+                    {% if player.college %}
+                        <span>{{ player.college.name }}</span>
+                    {% endif %}
+                    {% if player.is_firewallz_approved %}
+                        <span title="Verified by Firewallz" style="background:#163022;border-color:#1f4d30;color:#79d095;">Firewallz Approved</span>
+                    {% endif %}
+                    {% if player.email %}
+                        <span>{{ player.email }}</span>
+                    {% endif %}
+                    <span>Firewallz Approved: {{ player.verified_by_firewallz|yesno:"Yes,No" }}</span>
+                    {% if player.phone_number %}
+                        <span>{{ player.phone_number }}</span>
+                    {% endif %}
+                    <span>Joined {{ player.created_at|date:"M d, Y" }}</span>
+                </div>
+                <div class="meta-chips">
+                    {% if player.status %}<span>{{ player.status }}</span>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="edit-toggle-bar">
+            <div class="section-title">Profile Overview</div>
+            <div>
+                <button type="button" class="btn" id="editToggleBtn" onclick="toggleEdit()">Edit Mode</button>
+                <button type="button" class="btn danger" id="cancelEditBtn" style="display:none" onclick="cancelEdit()">Cancel</button>
+            </div>
+        </div>
+        <!-- Edit Form -->
+        <form id="editForm" method="post" enctype="multipart/form-data" style="display:none;margin-top:.5rem">
+            {% csrf_token %}
+            <div class="form-grid">
+                <div class="field avatar-field">
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var f = document.getElementById('editForm');
+                        if (f) f.action = "{% url 'edit_profile' %}";
+                    });
+                    </script>
+                    <div style="display:grid;gap:.75rem;margin-top:.75rem">
+                        <div style="display:flex;flex-direction:column;gap:.4rem">
+                            <label for="id_name" style="font-size:.62rem;font-weight:600;letter-spacing:.55px;text-transform:uppercase;color:#7d8ba0">Name</label>
+                            <input type="text" id="id_name" name="name" value="{{ player.name }}" placeholder="Your real name" style="background:#121a24;border:1px solid #243040;border-radius:9px;color:#e2edf9;padding:.6rem .7rem;font-size:.8rem">
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:.4rem">
+                            <label for="id_email" style="font-size:.62rem;font-weight:600;letter-spacing:.55px;text-transform:uppercase;color:#7d8ba0">Email</label>
+                            <input type="email" id="id_email" name="email" value="{{ player.email }}" placeholder="name@example.com" style="background:#121a24;border:1px solid #243040;border-radius:9px;color:#e2edf9;padding:.6rem .7rem;font-size:.8rem">
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:.4rem">
+                            <label for="id_phone_number" style="font-size:.62rem;font-weight:600;letter-spacing:.55px;text-transform:uppercase;color:#7d8ba0">Phone Number</label>
+                            <input type="text" id="id_phone_number" name="phone_number" value="{{ player.phone_number }}" placeholder="+1 555 123 4567" style="background:#121a24;border:1px solid:#243040;border-radius:9px;color:#e2edf9;padding:.6rem .7rem;font-size:.8rem">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div style="display:flex;gap:.75rem;margin-top:1.4rem;flex-wrap:wrap">
+                <button type="submit" class="btn primary">Save Changes</button>
+                <button type="button" class="btn" onclick="togglePreview()">Toggle Bio Preview</button>
+                <button type="button" class="btn danger" onclick="cancelEdit()">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<script>
+(function(){
+    const bio = document.getElementById('id_bio');
+    const bioCount = document.getElementById('bioCount');
+    if (bio) {
+        const updateCount = () => {
+            const len = bio.value.length;
+            bioCount.textContent = len;
+            if (len > 500) {
+                bio.style.borderColor = '#c54343';
+                bioCount.style.color = '#ff7777';
+            } else {
+                bio.style.borderColor = '';
+                bioCount.style.color = '';
+            }
+        };
+        bio.addEventListener('input', updateCount);
+        updateCount();
+    }
+})();
+
+function toggleEdit(){
+    const form = document.getElementById('editForm');
+    const read = document.getElementById('readView');
+    const btn = document.getElementById('editToggleBtn');
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    const active = form.style.display === 'block';
+    if (active) {
+        form.style.display = 'none';
+        read.style.display = 'block';
+        btn.textContent = 'Edit Mode';
+        cancelBtn.style.display='none';
+    } else {
+        form.style.display = 'block';
+        read.style.display = 'none';
+        btn.textContent = 'Editing...';
+        cancelBtn.style.display='inline-flex';
+    }
+}
+function enterEdit(){
+    const form = document.getElementById('editForm');
+    if (form.style.display !== 'block') toggleEdit();
+}
+function cancelEdit(){
+    if (confirm('Discard unsaved changes?')) {
+        window.location.reload();
+    }
+}
+function previewAvatar(e){
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { alert('Please select a valid image file.'); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+        const img = document.getElementById('avatarPreview');
+        if (img) img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+function togglePreview(){
+    const src = document.getElementById('id_bio');
+    const preview = document.getElementById('bioPreview');
+    if (!src || !preview) return;
+    if (preview.style.display === 'block') {
+        preview.style.display = 'none';
+    } else {
+        preview.textContent = src.value;
+        preview.style.display = 'block';
+    }
+}
+</script>
+{% endblock %}</div>

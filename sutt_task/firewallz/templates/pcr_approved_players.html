@@ -1,0 +1,136 @@
+{# File: firewallz/templates/pcr_approved_players.html #}
+{% extends "admin_base.html" %}
+{% load static %}
+{% block title %}PCR Approved Players{% endblock %}
+
+{% block extrahead %}
+<link rel="stylesheet" href="{% static 'css/pcr_approved_players.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-panel pcr-players">
+    <header class="panel-header">
+        <h1>PCR Approved Players</h1>
+    </header>
+
+    {% if team_players %}
+    <div class="table-wrap">
+        <table class="tbl tbl-striped" aria-describedby="pcr-players-desc">
+            <thead>
+                <style>
+                /* Card around the table */
+                .table-wrap {
+                    border: none;
+                    border-radius: 10px;
+                    padding: 10px;
+                    background: transparent !important;
+                    box-shadow: none;
+                }
+
+                /* Make table and cells transparent and text white so page background shows through */
+                .table-wrap .tbl,
+                .table-wrap .tbl th,
+                .table-wrap .tbl td {
+                    background: transparent !important;
+                    color: #fff !important;
+                    border-color: rgba(255,255,255,0.12) !important; /* optional lighter border for contrast */
+                }
+
+                .table-wrap .tbl thead th {
+                    background: transparent !important;
+                    color: #fff !important;
+                }
+
+                .table-wrap .tbl-striped tbody tr:nth-child(odd) td {
+                    background: transparent !important;
+                }
+
+                /* Table and cells */
+                .tbl {
+                    width: 100%;
+                    border-collapse: separate; /* keep cell borders visible as separate lines */
+                    border-spacing: 0;
+                    background: transparent;
+                }
+
+                .tbl th,
+                .tbl td {
+                    border: 1px solid rgba(224, 228, 232, 0.9); /* greyish-whitish cell borders */
+                    padding: 10px 12px;
+                    vertical-align: middle;
+                    background: #ffffff;
+                }
+
+                /* Slightly different header background for contrast */
+                .tbl thead th {
+                    background: #f7f8f9;
+                    font-weight: 600;
+                    text-align: left;
+                }
+
+                /* Actions column narrower */
+                .actions-col {
+                    width: 140px;
+                    text-align: center;
+                }
+
+                /* Keep the row striping if present but subtle */
+                .tbl-striped tbody tr:nth-child(odd) td {
+                    background: #fcfcfd;
+                }
+                </style>
+
+                <tr>
+                        <th>#</th>
+                        <th>Player</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>College</th>
+                        <th>Event-Category</th>
+                        <th>Status</th>
+                        <th class="actions-col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in team_players %}
+                <tr>
+                    <td class="mono">{{ forloop.counter }}</td>
+                    <td>
+                        {{ player.player.name }}
+                    </td>
+                    <td>
+                        {{ player.player.email|default:"-" }}
+                    </td>
+                    <td>{{ player.player.phone_number|default:"-" }}</td>
+                    <td>
+                        {{ player.player.college.name|default:"-" }}
+                    </td>
+                    <td>
+                        {{ player.team.sport.name|default:"-" }} - {{ player.team.sport.gender|default:"-" }}
+                    </td>
+                    <td>
+                        {% if not player.player.verified_by_firewallz %}
+                        <form method="post" action="{% url 'approve_player' player.static_id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-approve" style="margin-left:8px;padding:4px 8px;border:1px solid #28a745;background:#28a745;color:#fff;border-radius:4px;cursor:pointer;font-size:12px;">
+                                Approve
+                            </button>
+                        </form>
+                        {% else %}
+                        <span style="margin-left:8px;color:#28a745;font-weight:600;">Approved</span>
+                        {% endif %}
+                    </td>
+                    <td class="actions-col">
+                        <a href="#" class="btn-view" title="View player" aria-label="View player"
+                           style="display:inline-block;padding:6px 10px;border:1px solid #0b74de;border-radius:4px;color:#0b74de;text-decoration:none;font-weight:600;">
+                            View
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

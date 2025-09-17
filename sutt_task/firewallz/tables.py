@@ -44,9 +44,10 @@ class TeamPlayerTable(tables.Table):
         template_name = "django_tables2/bootstrap4.html"
         # add Bootstrap dark/card-friendly classes to the table element
         attrs = {
-            "class": "table table-sm table-dark table-hover table-borderless text-light",
+            "class": "table table-striped table-bordered table-hover align-middle",
             "thead": {"class": "thead-dark"},
-            "th": {"class": "align-middle text-uppercase small font-weight-bold"},
+            "th": {"class": "align-middle text-uppercase small fw-bold"},
+            "td": {"class": "align-middle"},
         }
         row_attrs = {
             "class": "align-middle",

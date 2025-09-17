@@ -1,127 +1,186 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Teams You Are Participating In</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { display:flex; margin:0; }
-        .sidebar {
-            min-width:200px;
-            max-width:220px;
-            background:#343a40;
-            color:#fff;
-            height:100vh;
-            padding-top:30px;
-        }
-        .sidebar a {
-            color: #fff;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 18px;
-            margin: 8px 12px;
-            border-radius: 10px;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-            text-transform: capitalize;
-            position: relative;
-            overflow: hidden;
-            transition: background 180ms ease, transform 120ms ease, box-shadow 180ms ease;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-        }
+{% extends 'player_base.html' %}
+{% load static %}
+{% block title %}Player Dashboard{% endblock %}
 
-        /* subtle colored accent bar on hover/active */
-        .sidebar a::before {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: 8px;
-            bottom: 8px;
-            width: 4px;
-            border-radius: 6px;
-            background: linear-gradient(180deg, #3ad0ff, #6b8cff);
-            opacity: 0;
-            transform: scaleY(.9);
-            transition: opacity 160ms ease, transform 160ms ease;
-        }
+{% block extra_css %}
+<style>
+.table-wrap{
+  border:2px solid #3794ff;
+  border-radius:14px;
+  padding:12px 14px 18px;
+  background:#0d1a28;
+  box-shadow:0 0 0 1px #1d3c57, 0 4px 18px -6px rgba(0,0,0,.55);
+}
 
-        .sidebar a:hover {
-            transform: translateX(6px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.18);
-        }
-        /* crisp, subtle page background */
-        body {
-            background: linear-gradient(180deg, #f7fbff 0%, #eef6ff 40%, #f0f5fb 100%);
-            background-attachment: fixed;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            color: #0f1724;
-        }
+/* FORCE borders */
+.tbl{
+  width:100%;
+  border-collapse:collapse; /* collapse so borders double-strength */
+  font-size:.9rem;
+  background:#0f2233;
+  color:#fff;
+}
+.tbl thead th{
+  background:#17344d;
+  color:#f1f7fe;
+  font-weight:600;
+  letter-spacing:.4px;
+  padding:12px 20px;
+  border:1px solid #3794ff;
+}
+.tbl tbody td{
+  background:#132b40;
+  padding:11px 20px;
+  border:1px solid #3794ff;
+  vertical-align:middle;
+}
+.tbl tbody tr:nth-child(even) td{
+  background:#19364d;
+}
+.tbl tbody tr:hover td{
+  background:#204563;
+}
 
-        /* very subtle textured overlay for depth while keeping crispness */
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 12px 12px;
-            mix-blend-mode: overlay;
-            opacity: 0.9;
-        }
+.status-badge{
+  display:inline-block;
+  background:#204f7a;
+  border:1px solid #3fa6ff;
+  color:#bfe2ff;
+  font-size:.62rem;
+  font-weight:600;
+  padding:.38rem .6rem;
+  border-radius:20px;
+  letter-spacing:.5px;
+}
 
-        /* give the main content a crisp card look */
-        .main-content {
-            background: rgba(255,255,255,0.96);
-            background: rgba(15,23,42,0.96);
-            color: #f8fafc;
-            border: 1px solid rgba(255,255,255,0.04);
-            box-shadow: 0 12px 30px rgba(15,23,42,0.07);
-            padding: 30px;
-            backdrop-filter: blur(6px);
-        }
+.pay-pill{
+  display:inline-block;
+  padding:.35rem .6rem;
+  font-size:.6rem;
+  font-weight:700;
+  border-radius:18px;
+  border:1px solid #ffbd66;
+  background:#ffbd66;
+  color:#2a1d00;
+  margin-right:.4rem;
+}
+.pay-pill.paid{
+  background:#23b06b;
+  border-color:#23b06b;
+  color:#ffffff;
+}
 
-        /* refine sidebar with subtle gradient and separation */
-        .sidebar {
-            background: linear-gradient(180deg, #2c3338 0%, #343a40 100%);
-            border-right: 1px solid rgba(255,255,255,0.03);
-            box-shadow: 2px 0 12px rgba(11,18,26,0.06);
-            -webkit-font-smoothing: antialiased;
-        }
+.action-btn{
+  display:inline-block;
+  margin-top:.45rem;
+  padding:.5rem .85rem;
+  font-size:.68rem;
+  font-weight:600;
+  text-decoration:none;
+  color:#fff;
+  background:#2d6dff;
+  border:1px solid #4483ff;
+  border-radius:8px;
+  box-shadow:0 2px 8px -2px rgba(45,109,255,.55);
+  transition:background .18s, transform .15s;
+}
+.action-btn:hover{
+  background:#1f5be0;
+  transform:translateY(-2px);
+}
+.action-btn.receipt{
+  background:#44566a;
+  border-color:#5c6f84;
+}
+.action-btn.receipt:hover{
+  background:#556b84;
+}
 
-        /* crisp link text and smoother transitions */
-        .sidebar a {
-            will-change: transform, box-shadow;
-            text-shadow: none;
-        }
-        .sidebar a:hover::before,
-        .sidebar a.active::before {
-            opacity: 1;
-            transform: scaleY(1);
-        }
-        .sidebar a:hover { background:#495057; }
-        .main-content { flex:1; padding:30px; }
-    </style>
-</head>
-<body>
-    {% load django_tables2 %}
-    <div class="sidebar">
-        <a href="/firewallz/player/dashboard/">Dashboard</a>
-        <a href="/firewallz/player/sports_registration/">Register For a Sport</a>
-        <a href="#">Profile</a>
-        <a href="/firewallz/player/logout/">Logout</a>
-    </div>
-    <div class="main-content">
-        <div class="container-fluid">
-            <h2 class="mb-4">Teams You Are Participating In</h2>
-            {% if table %}
-                {% render_table table %}
-            {% else %}
-                <div class="alert alert-info">No team participation yet.</div>
-            {% endif %}
-        </div>
-    </div>
-</body>
-</html>
+.empty-row td{
+  text-align:center;
+  padding:40px 12px;
+  background:#162f44;
+  font-size:.95rem;
+  color:#b7cad8;
+}
+
+@media (max-width:850px){
+  .tbl thead{display:none;}
+  .tbl, .tbl tbody, .tbl tr, .tbl td{display:block;width:100%;}
+  .tbl tr{
+    margin:0 0 16px;
+    border:2px solid #3794ff;
+    border-radius:12px;
+    overflow:hidden;
+  }
+  .tbl td{
+    border:none;
+    border-bottom:1px solid #2c5780;
+    background:#17344d;
+    padding:10px 16px 9px;
+  }
+  .tbl td:last-child{border-bottom:none;}
+  .tbl td:before{
+    content:attr(data-label);
+    display:block;
+    font-size:.55rem;
+    text-transform:uppercase;
+    letter-spacing:.45px;
+    color:#89bfe8;
+    margin-bottom:4px;
+    font-weight:600;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 style="margin:0 0 14px;font-weight:600;font-size:1.35rem;color:#fff;">Teams You Are Participating In</h2>
+<div class="table-wrap">
+  <table class="tbl" aria-describedby="player-teams">
+    <thead>
+      <tr>
+        <th>Event</th>
+        <th>Team</th>
+        <th>College</th>
+        <th>Sport</th>
+        <th>Status</th>
+        <th style="width:170px;">Payment</th>
+        <th style="width:100px;">View</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td data-label="Event">{{ r.event }}</td>
+        <td data-label="Team">{{ r.team.name|default:r.team }}</td>
+        <td data-label="College">{{ r.college.name|default:r.college }}</td>
+        <td data-label="Sport">{{ r.sport.name|default:r.sport }}</td>
+        <td data-label="Status"><span class="status-badge">{{ r.status|upper }}</span></td>
+        <td data-label="Payment">
+          {% if r.is_paid %}
+            <span class="pay-pill paid">PAID</span><br>
+            <a href="{% url 'print_receipt' r.team_player_id %}" class="action-btn receipt">Receipt</a>
+        {% else %}
+            <span class="pay-pill">UNPAID</span><br>
+            <a href="{% url 'make_sport_payment' r.team_player_id %}" class="action-btn">Pay Now</a><br>
+        {% endif %}
+        </td>
+        <td data-label="View">
+            <a href="{% url 'view_team_members' r.team.pk %}" class="action-btn" role="button"
+                style="background:#0f62fe;border-color:#0f62fe;border-radius:10px;padding:.55rem .95rem;
+                         font-size:.66rem;letter-spacing:.4px;
+                         box-shadow:0 4px 14px -4px rgba(15,98,254,.6),0 0 0 1px #1d4f9e;">
+              View
+            </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr class="empty-row">
+        <td colspan="6">No team participation yet.</td>
+      </tr>
+      {% endfor %} 
+    </tbody>
+  </table>
+</div>
+{% endblock %}

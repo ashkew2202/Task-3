@@ -429,6 +429,7 @@ class Team(models.Model):
         blank=True,
     )
     # team_players: reverse relation to TeamPlayer
+    is_verified_by_firewallz = models.BooleanField(default=False)
     is_locked = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -497,7 +498,6 @@ class Team(models.Model):
             gender_code = self.sport.gender[0].upper() if self.sport.gender else "X"
             college_code = self.college.letter_code or self.college.name[:3].upper()
             sport_code = self.sport.name.replace(" ", "")[:4].upper()
-            # Count existing teams for this college/sport/gender to make code unique
             count = Team.all_objects.filter(
                 college=self.college,
                 sport=self.sport,
@@ -774,3 +774,62 @@ class Transaction(models.Model):
     def __str__(self):
         return f"Transaction {self.reference_no} for {self.paid_for.name} - Amount: {self.amount} - Status: {self.status}"
 
+class Group(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, null=True)
+    college = models.ForeignKey(
+        "firewallz.College",
+        related_name="player_groups",
+        on_delete=models.CASCADE,
+        help_text="College this group belongs to",
+    )
+    players = models.ManyToManyField(
+        "firewallz.Player",
+        related_name="approval_groups",
+        blank=True,
+        help_text="Players in this group (must all belong to the same college)",
+    )
+    max_size = models.PositiveIntegerField(
+        default=0,
+        help_text="Maximum players allowed (0 = unlimited).",
+    )
+    is_locked = models.BooleanField(
+        default=False,
+        help_text="If locked, membership cannot change.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        super().clean()
+        # To check if all the players have the same college as the group
+        if self.pk:
+            # Enforce max size
+            if self.max_size and self.players.count() > self.max_size:
+                raise ValidationError("Group size exceeds max_size.")
+        if self.is_locked and self.pk:
+            # Prevent unlocking changes by adding/removing players indirectly
+            pass
+
+    def add_player(self, player):
+        if self.is_locked:
+            raise ValidationError("Group is locked.")
+        if player.college_id != self.college_id:
+            raise ValidationError("Player's college does not match group college.")
+        if self.max_size and self.players.count() >= self.max_size:
+            raise ValidationError("Group is full.")
+        self.players.add(player)
+
+    def remove_player(self, player):
+        if self.is_locked:
+            raise ValidationError("Group is locked.")
+        self.players.remove(player)
+    
+
+    class Meta:
+        verbose_name = "Group"
+        verbose_name_plural = "Groups"
+
+    def __str__(self):
+        # Human-readable representation: name plus context about its purpose.
+        return f"{self.name} (Approval Group)"
